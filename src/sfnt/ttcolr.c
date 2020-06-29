@@ -40,6 +40,7 @@
 
   /* NOTE: These are the table sizes calculated through the specs. */
 #define BASE_GLYPH_SIZE            6
+#define BASE_GLYPH_V1_SIZE         8
 #define LAYER_SIZE                 4
 #define COLR_HEADER_SIZE          14
 
@@ -61,6 +62,9 @@
 
     FT_Byte*  base_glyphs;
     FT_Byte*  layers;
+
+    FT_UShort num_base_glyphs_v1;
+    FT_Byte*  base_glyphs_v1;
 
     /* The memory which backs up the `COLR' table. */
     void*     table;
@@ -91,7 +95,7 @@
 
     Colr*  colr = NULL;
 
-    FT_ULong  base_glyph_offset, layer_offset;
+    FT_ULong  base_glyph_offset, layer_offset, base_glyphs_v1_offset;
     FT_ULong  table_size;
 
 
@@ -115,7 +119,7 @@
       goto NoColr;
 
     colr->version = FT_NEXT_USHORT( p );
-    if ( colr->version != 0 )
+    if ( colr->version != 0 && colr->version != 1 )
       goto InvalidTable;
 
     colr->num_base_glyphs = FT_NEXT_USHORT( p );
@@ -134,6 +138,22 @@
       goto InvalidTable;
     if ( colr->num_layers * LAYER_SIZE > table_size - layer_offset )
       goto InvalidTable;
+
+    if ( colr->version == 1 ) {
+      base_glyphs_v1_offset = FT_NEXT_ULONG( p );
+
+      if ( base_glyphs_v1_offset >= table_size )
+        goto InvalidTable;
+
+      p = (FT_Byte*)( table + base_glyphs_v1_offset );
+      colr->num_base_glyphs_v1 = FT_NEXT_ULONG( p );
+
+      if ( colr->num_base_glyphs_v1 * BASE_GLYPH_V1_SIZE >
+           table_size - base_glyphs_v1_offset )
+        goto InvalidTable;
+
+      colr->base_glyphs_v1 = p;
+    }
 
     colr->base_glyphs = (FT_Byte*)( table + base_glyph_offset );
     colr->layers      = (FT_Byte*)( table + layer_offset      );
