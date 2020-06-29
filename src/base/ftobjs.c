@@ -5547,5 +5547,56 @@
       return 0;
   }
 
+  FT_EXPORT_DEF ( FT_Bool )
+  FT_Get_Color_Glyph_Layer_Gradients ( FT_Face           face,
+                                       FT_UInt           base_glyph,
+                                       FT_UInt *         aglyph_index,
+                                       FT_COLR_Paint *   paint,
+                                       FT_LayerIterator *iterator )
+  {
+    TT_Face       ttface;
+    SFNT_Service  sfnt;
+
+    if ( !face || !paint || !iterator )
+      return 0;
+
+    if ( !FT_IS_SFNT( face ) )
+      return 0;
+
+    ttface = (TT_Face)face;
+    sfnt   = (SFNT_Service)ttface->sfnt;
+
+    if ( sfnt->get_colr_layer )
+      return sfnt->get_colr_layer_gradients ( ttface,
+                                              base_glyph,
+                                              aglyph_index,
+                                              paint,
+                                              iterator );
+    else
+      return 0;
+  }
+
+  FT_EXPORT_DEF ( FT_Bool )
+  FT_Get_Colorline_Stops ( FT_Face               face,
+                           FT_ColorStop *        color_stop,
+                           FT_ColorStopIterator *iterator )
+  {
+    TT_Face       ttface;
+    SFNT_Service  sfnt;
+
+    if ( !face || !color_stop || !iterator )
+      return 0;
+
+    if ( !FT_IS_SFNT( face ) )
+      return 0;
+
+    ttface = (TT_Face)face;
+    sfnt   = (SFNT_Service)ttface->sfnt;
+
+    if ( sfnt->get_colorline_stops )
+      return sfnt->get_colorline_stops ( ttface, color_stop, iterator );
+    else
+      return 0;
+  }
 
 /* END */

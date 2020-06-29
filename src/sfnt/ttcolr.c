@@ -5,7 +5,7 @@
  *   TrueType and OpenType colored glyph layer support (body).
  *
  * Copyright (C) 2018-2020 by
- * David Turner, Robert Wilhelm, and Werner Lemberg.
+ * David Turner, Robert Wilhelm, Dominik Röttsches and Werner Lemberg.
  *
  * Originally written by Shao Yu Zhang <shaozhang@fb.com>.
  *
@@ -40,6 +40,9 @@
 
   /* NOTE: These are the table sizes calculated through the specs. */
 #define BASE_GLYPH_SIZE            6
+#define BASE_GLYPH_V1_SIZE         6
+#define LAYER_V1_RECORD_SIZE       6
+#define COLOR_STOP_SIZE            6
 #define LAYER_SIZE                 4
 #define COLR_HEADER_SIZE          14
 
@@ -52,6 +55,12 @@
 
   } BaseGlyphRecord;
 
+  typedef struct BaseGlyphV1Record_
+  {
+    FT_UShort gid;
+    /* offet to parent BaseGlyphV1Array */
+    FT_ULong layer_array_offset;
+  } BaseGlyphV1Record;
 
   typedef struct Colr_
   {
@@ -61,6 +70,9 @@
 
     FT_Byte*  base_glyphs;
     FT_Byte*  layers;
+
+    FT_UShort num_base_glyphs_v1;
+    FT_Byte*  base_glyphs_v1;
 
     /* The memory which backs up the `COLR' table. */
     void*     table;
@@ -86,12 +98,13 @@
     FT_Error   error;
     FT_Memory  memory = face->root.memory;
 
-    FT_Byte*  table = NULL;
-    FT_Byte*  p     = NULL;
+    FT_Byte *table = NULL;
+    FT_Byte *p = NULL;
 
     Colr*  colr = NULL;
 
-    FT_ULong  base_glyph_offset, layer_offset;
+    FT_ULong base_glyph_offset, layer_offset, base_glyphs_v1_offset,
+        num_base_glyphs_v1;
     FT_ULong  table_size;
 
 
@@ -115,7 +128,7 @@
       goto NoColr;
 
     colr->version = FT_NEXT_USHORT( p );
-    if ( colr->version != 0 )
+    if ( colr->version != 0 && colr->version != 1 )
       goto InvalidTable;
 
     colr->num_base_glyphs = FT_NEXT_USHORT( p );
@@ -134,6 +147,24 @@
       goto InvalidTable;
     if ( colr->num_layers * LAYER_SIZE > table_size - layer_offset )
       goto InvalidTable;
+
+    if ( colr->version == 1 ) {
+      base_glyphs_v1_offset = FT_NEXT_ULONG( p );
+
+      if ( base_glyphs_v1_offset >= table_size )
+        goto InvalidTable;
+
+      p = (FT_Byte*)( table + base_glyphs_v1_offset );
+      num_base_glyphs_v1 = FT_PEEK_ULONG( p );
+
+      if ( num_base_glyphs_v1 * BASE_GLYPH_V1_SIZE >
+           table_size - base_glyphs_v1_offset )
+      {
+        goto InvalidTable;
+      }
+      colr->num_base_glyphs_v1 = num_base_glyphs_v1;
+      colr->base_glyphs_v1     = p;
+    }
 
     colr->base_glyphs = (FT_Byte*)( table + base_glyph_offset );
     colr->layers      = (FT_Byte*)( table + layer_offset      );
@@ -264,6 +295,280 @@
     return 1;
   }
 
+  static FT_Bool
+  read_color_line ( Colr *        colr,
+                    FT_Byte *     paint_base,
+                    FT_ULong      colorline_offset,
+                    FT_ColorLine *colorline )
+  {
+    FT_Byte *      p = (FT_Byte *)( paint_base + colorline_offset );
+    FT_PaintExtend paint_extend;
+    /* TODO: Check pointer limits. */
+
+    paint_extend = FT_NEXT_USHORT ( p );
+    if ( paint_extend > COLR_PAINT_EXTEND_REFLECT )
+      return 0;
+
+    colorline->extend = paint_extend;
+
+    colorline->color_stop_iterator.num_color_stops    = FT_NEXT_USHORT ( p );
+    colorline->color_stop_iterator.p                  = p;
+    colorline->color_stop_iterator.current_color_stop = 0;
+
+    return 1;
+  }
+
+  static FT_Bool
+  read_affine ( Colr *     colr,
+                FT_Byte *  paint_base,
+                FT_ULong   affine_offset,
+                FT_Matrix *affine )
+  {
+    FT_Byte *p = (FT_Byte *)( paint_base + affine_offset );
+    /* TODO: Check pointer limits against colr->table etc. */
+
+    affine->xx = FT_NEXT_LONG ( p );
+    FT_NEXT_ULONG ( p ); /* drop varIdx */
+    affine->xy = FT_NEXT_LONG ( p );
+    FT_NEXT_ULONG ( p ); /* drop varIdx */
+    affine->yx = FT_NEXT_LONG ( p );
+    FT_NEXT_ULONG ( p ); /* drop varIdx */
+    affine->yy = FT_NEXT_LONG ( p );
+    FT_NEXT_ULONG ( p ); /* drop varIdx */
+
+    return 1;
+  }
+
+  static FT_Bool
+  read_paint ( Colr *         colr,
+               FT_Byte *      layer_v1_array,
+               FT_ULong       paint_offset,
+               FT_COLR_Paint *apaint )
+  {
+    FT_Byte *p, *paint_base;
+
+    p          = layer_v1_array + paint_offset;
+    paint_base = p;
+
+    apaint->format = FT_NEXT_USHORT ( p );
+
+    if ( apaint->format >= COLR_PAINT_FORMAT_MAX )
+      return 0;
+
+    if ( apaint->format == COLR_PAINTFORMAT_SOLID )
+    {
+      apaint->u.solid.color.palette_index = FT_NEXT_USHORT ( p );
+      apaint->u.solid.color.alpha = FT_NEXT_USHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+    }
+    else if ( apaint->format == COLR_PAINTFORMAT_LINEAR_GRADIENT )
+    {
+      FT_ULong color_line_offset = 0;
+      color_line_offset = FT_NEXT_ULONG ( p );
+      if ( !read_color_line ( colr,
+                              paint_base,
+                              color_line_offset,
+                              &apaint->u.linear_gradient.colorline ) )
+        return 0;
+      apaint->u.linear_gradient.p0.x = FT_NEXT_SHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p0.y = FT_NEXT_SHORT ( p );
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p1.x = FT_NEXT_SHORT ( p );
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p1.y = FT_NEXT_SHORT ( p );
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p2.x = FT_NEXT_SHORT ( p );
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p2.y = FT_NEXT_SHORT ( p );
+      FT_NEXT_ULONG ( p );
+    } else if ( apaint->format == COLR_PAINTFORMAT_RADIAL_GRADIENT )
+    {
+      FT_ULong color_line_offset = 0;
+      FT_ULong affine_offset = 0;
+
+      color_line_offset = FT_NEXT_ULONG ( p );
+      if ( !read_color_line ( colr,
+                              paint_base,
+                              color_line_offset,
+                              &apaint->u.linear_gradient.colorline ) )
+        return 0;
+
+      apaint->u.radial_gradient.c0.x = FT_NEXT_SHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+      apaint->u.radial_gradient.c0.y = FT_NEXT_SHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+
+      apaint->u.radial_gradient.r0 = FT_NEXT_USHORT ( p );
+      FT_NEXT_ULONG ( p );
+
+      apaint->u.radial_gradient.c1.x = FT_NEXT_SHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+      apaint->u.radial_gradient.c1.y = FT_NEXT_SHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+
+      apaint->u.radial_gradient.r1 = FT_NEXT_USHORT ( p );
+      FT_NEXT_ULONG ( p );
+
+      affine_offset = FT_NEXT_ULONG ( p );
+
+      if ( !affine_offset )
+        return 1;
+
+      /* TODO: Is there something like a const FT_Matrix_Unity? */
+      apaint->u.radial_gradient.affine.xx = 1;
+      apaint->u.radial_gradient.affine.xy = 0;
+      apaint->u.radial_gradient.affine.yx = 1;
+      apaint->u.radial_gradient.affine.yy = 0;
+
+      if ( !read_affine ( colr,
+                          paint_base,
+                          affine_offset,
+                          &apaint->u.radial_gradient.affine ) )
+        return 0;
+    }
+
+    return 1;
+  }
+
+  static FT_Bool
+  find_base_glyph_v1_record ( FT_Byte *          base_glyph_begin,
+                              FT_Int             num_base_glyph,
+                              FT_UInt            glyph_id,
+                              BaseGlyphV1Record *record )
+  {
+    FT_Int  min = 0;
+    FT_Int  max = num_base_glyph - 1;
+
+
+    while ( min <= max )
+    {
+      FT_Int    mid = min + ( max - min ) / 2;
+      /* base_glyph_begin is the beginning of the BaseGlyphV1Array, skip the
+       * array length by adding 4 to start binary search in layers. */
+      FT_Byte * p   = base_glyph_begin + 4 + mid * BASE_GLYPH_V1_SIZE;
+
+      FT_UShort  gid = FT_NEXT_USHORT( p );
+
+      if ( gid < glyph_id )
+        min = mid + 1;
+      else if (gid > glyph_id )
+        max = mid - 1;
+      else
+      {
+        record->gid                = gid;
+        record->layer_array_offset = FT_NEXT_ULONG ( p );
+        return 1;
+      }
+    }
+
+    return 0;
+  }
+
+  FT_LOCAL_DEF ( FT_Bool )
+  tt_face_get_colr_layer_gradients ( TT_Face           face,
+                                     FT_UInt           base_glyph,
+                                     FT_UInt *         aglyph_index,
+                                     FT_COLR_Paint *   paint,
+                                     FT_LayerIterator *iterator )
+  {
+    Colr* colr = (Colr*)face->colr;
+    BaseGlyphV1Record base_glyph_v1_record;
+    FT_Byte *         p, *layer_v1_array;
+    FT_UInt gid;
+
+    if ( colr->version < 1 || !colr->num_base_glyphs_v1 ||
+         !colr->base_glyphs_v1 )
+      return 0;
+
+    if ( !iterator->p )
+    {
+      iterator->layer = 0;
+      if ( !find_base_glyph_v1_record ( colr->base_glyphs_v1,
+                                        colr->num_base_glyphs_v1,
+                                        base_glyph,
+                                        &base_glyph_v1_record ) )
+        return 0;
+
+      /* Try to find layer size to configure iterator */
+      if ( !base_glyph_v1_record.layer_array_offset ||
+           base_glyph_v1_record.layer_array_offset > colr->table_size )
+        return 0;
+
+      p                    = (FT_Byte *)( colr->base_glyphs_v1 +
+                       base_glyph_v1_record.layer_array_offset );
+      iterator->num_layers = FT_NEXT_ULONG ( p );
+
+      if ( p > (FT_Byte *)( colr->table + colr->table_size ) )
+        return 0;
+
+      iterator->p = p;
+    }
+
+    if ( iterator->layer >= iterator->num_layers )
+      return 0;
+
+    /* We have an iterator pointing at a LayerV1Record */
+    p = iterator->p;
+
+
+    /* reverse to layer_v1_array, TODO */
+    /* TODO: More checks on this one. */
+    layer_v1_array = p - iterator->layer * LAYER_V1_RECORD_SIZE - 4 /* array size */;
+
+    gid = FT_NEXT_USHORT(p);
+
+    if ( gid > ( FT_UInt ) ( FT_FACE ( face )->num_glyphs ) )
+      return 0;
+
+    if ( !read_paint ( colr, layer_v1_array, FT_NEXT_ULONG ( p ), paint ) )
+      return 0;
+
+    *aglyph_index = gid;
+    iterator->p = p;
+
+    iterator->layer++;
+
+    return 1;
+  }
+
+  FT_LOCAL_DEF ( FT_Bool )
+  tt_face_get_colorline_stops ( TT_Face               face,
+                                FT_ColorStop *        color_stop,
+                                FT_ColorStopIterator *iterator )
+  {
+    Colr* colr = (Colr*)face->colr;
+    FT_Byte *p;
+
+    if ( iterator->current_color_stop >= iterator->num_color_stops )
+      return 0;
+
+    if ( iterator->p +
+             ( ( iterator->num_color_stops - iterator->current_color_stop ) *
+               COLOR_STOP_SIZE ) >
+         (FT_Byte *)( colr->table + colr->table_size ) )
+      return 0;
+
+    /* Iterator points at first ColorStop of ColorLine */
+    p = iterator->p;
+
+    color_stop->stop_offset         = FT_NEXT_USHORT ( p );
+    FT_NEXT_ULONG ( p ); /* skip varIdx */
+    color_stop->color.palette_index = FT_NEXT_USHORT ( p );
+    color_stop->color.alpha         = FT_NEXT_USHORT ( p );
+    FT_NEXT_ULONG ( p ); /* skip varIdx */
+
+    iterator->p = p;
+    iterator->current_color_stop++;
+
+    return 1;
+  }
 
   FT_LOCAL_DEF( FT_Error )
   tt_face_colr_blend_layer( TT_Face       face,
