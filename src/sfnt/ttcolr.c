@@ -334,6 +334,10 @@
     FT_Byte* p;
     FT_UInt gid;
 
+    if ( colr->version < 1 || !colr->num_base_glyphs_v1 ||
+         !colr->base_glyphs_v1 )
+      return 0;
+
     if ( !iterator->p )
     {
       iterator->layer = 0;
