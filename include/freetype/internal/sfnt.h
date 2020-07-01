@@ -526,6 +526,7 @@ FT_BEGIN_HEADER
   typedef FT_Bool ( *TT_Get_Color_Glyph_Layer_Gradients_Func ) (
       TT_Face           face,
       FT_UInt           base_glyph,
+      FT_UInt *         aglyph_index,
       FT_COLR_Paint *   paint,
       FT_LayerIterator *iterator );
 
