@@ -56,6 +56,7 @@
   typedef struct BaseGlyphV1Record_
   {
     FT_UShort gid;
+    /* offet to parent BaseGlyphV1Array */
     FT_ULong layer_array_offset;
   } BaseGlyphV1Record;
 
@@ -302,7 +303,7 @@
     while ( min <= max )
     {
       FT_Int    mid = min + ( max - min ) / 2;
-      FT_Byte*  p   = base_glyph_begin + mid * BASE_GLYPH_SIZE;
+      FT_Byte*  p   = base_glyph_begin + mid * BASE_GLYPH_V1_SIZE;
 
       FT_UShort  gid = FT_NEXT_USHORT( p );
 
@@ -352,7 +353,8 @@
            base_glyph_v1_record.layer_array_offset > colr->table_size )
         return 0;
 
-      p = (FT_Byte *)( colr->table + base_glyph_v1_record.layer_array_offset );
+      p                    = (FT_Byte *)( colr->base_glyphs_v1 +
+                       base_glyph_v1_record.layer_array_offset );
       iterator->num_layers = FT_NEXT_ULONG ( p );
 
       if ( p > (FT_Byte *)( colr->table + colr->table_size ) )
