@@ -4176,17 +4176,14 @@ FT_BEGIN_HEADER
                             FT_UInt           *acolor_index,
                             FT_LayerIterator*  iterator );
 
-
-  typedef enum  COLR_PaintFormat_
+  typedef enum FT_COLR_PaintFormat_
   {
     COLR_PAINTFORMAT_SOLID           = 1,
     COLR_PAINTFORMAT_LINEAR_GRADIENT = 2,
     COLR_PAINTFORMAT_RADIAL_GRADIENT = 3
+  } FT_COLR_PaintFormat;
 
-  } COLR_PaintFormat;
-
-
-  typedef struct  FT_ColorStopIterator_
+  typedef struct FT_ColorStopIterator_
   {
     FT_UInt   num_color_stops;
     FT_UInt   current_color_stop;
@@ -4194,11 +4191,47 @@ FT_BEGIN_HEADER
 
   } FT_ColorStopIterator;
 
+  typedef struct FT_PaintColor_
+  {
+    FT_UInt16  palette_index;
+    FT_F2Dot14 transparency;
+  } FT_PaintColor;
+
+  typedef struct FT_PaintSolid_
+  {
+    FT_COLR_PaintFormat format;
+    FT_PaintColor color;
+  } FT_PaintSolid;
+
+  typedef enum FT_PaintExtend_
+  {
+    COLR_PAINT_EXTEND_PAD     = 0,
+    COLR_PAINT_EXTEND_REPEAT  = 1,
+    COLR_PAINT_EXTEND_REFLECT = 2
+  } FT_PaintExtend;
+
+  typedef struct FT_ColorLine_
+  {
+    FT_PaintExtend       extend;
+    FT_ColorStopIterator colorline;
+  } FT_ColorLine;
+
+  typedef struct FT_PaintLinearGradient_
+  {
+    FT_COLR_PaintFormat  format;
+    FT_ColorLine         colorline;
+    FT_Vector            p0;
+    FT_Vector            p1;
+    FT_Vector            p2;
+  } FT_PaintLinearGradient;
 
   typedef union COLR_Paint_
   {
-    FT_UInt16 format;
-
+    FT_COLR_PaintFormat format;
+    union {
+      FT_PaintSolid solid;
+      FT_PaintLinearGradient linear_gradient;
+    } u;
   } COLR_Paint;
 
   /**************************************************************************
