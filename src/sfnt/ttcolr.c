@@ -284,6 +284,22 @@
     return 1;
   }
 
+  FT_LOCAL_DEF ( FT_Bool )
+  tt_face_get_colr_layer_gradients ( TT_Face           face,
+                                     FT_UInt           base_glyph,
+                                     FT_COLR_Paint *   paint,
+                                     FT_LayerIterator *iterator )
+  {
+    return 0;
+  }
+
+  FT_LOCAL_DEF ( FT_Bool )
+  tt_face_get_colorline_stops ( TT_Face               face,
+                                FT_PaintColor *       color_stop,
+                                FT_ColorStopIterator *iterator )
+  {
+    return 0;
+  }
 
   FT_LOCAL_DEF( FT_Error )
   tt_face_colr_blend_layer( TT_Face       face,

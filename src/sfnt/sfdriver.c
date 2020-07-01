@@ -1287,6 +1287,10 @@
                             /* TT_Set_Palette_Func     set_palette     */
     PUT_COLOR_LAYERS( tt_face_get_colr_layer ),
                             /* TT_Get_Colr_Layer_Func  get_colr_layer  */
+    PUT_COLOR_LAYERS( tt_face_get_colr_layer_gradients ),
+                            /* TT_Get_Colr_Layer_Gradients_Func  get_colr_layer_gradients  */
+    PUT_COLOR_LAYERS( tt_face_get_colorline_stops ),
+                            /* TT_Get_Colorline_Stops_Func  get_colorline_stops  */
     PUT_COLOR_LAYERS( tt_face_colr_blend_layer ),
                             /* TT_Blend_Colr_Func      colr_blend      */
 

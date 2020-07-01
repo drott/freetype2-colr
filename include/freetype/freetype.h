@@ -4243,7 +4243,8 @@ FT_BEGIN_HEADER
                                        FT_LayerIterator *iterator );
 
   FT_EXPORT ( FT_Bool )
-  FT_Get_Colorline_Stops ( FT_PaintColor          color_stop,
+  FT_Get_Colorline_Stops ( FT_Face               face,
+                           FT_PaintColor *       color_stop,
                            FT_ColorStopIterator *iterator );
 
   /**************************************************************************
