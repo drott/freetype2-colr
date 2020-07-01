@@ -4267,6 +4267,7 @@ FT_BEGIN_HEADER
   FT_EXPORT ( FT_Bool )
   FT_Get_Color_Glyph_Layer_Gradients ( FT_Face           face,
                                        FT_UInt           base_glyph,
+                                       FT_UInt           *aglyph_index,
                                        FT_COLR_Paint *   paint,
                                        FT_LayerIterator *iterator );
 

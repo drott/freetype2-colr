@@ -53,6 +53,11 @@
 
   } BaseGlyphRecord;
 
+  typedef struct BaseGlyphV1Record_
+  {
+    FT_UShort gid;
+    FT_ULong layer_array_offset;
+  } BaseGlyphV1Record;
 
   typedef struct Colr_
   {
@@ -284,13 +289,92 @@
     return 1;
   }
 
+  static FT_Bool
+  find_base_glyph_v1_record ( FT_Byte *          base_glyph_begin,
+                              FT_Int             num_base_glyph,
+                              FT_UInt            glyph_id,
+                              BaseGlyphV1Record *record )
+  {
+    FT_Int  min = 0;
+    FT_Int  max = num_base_glyph - 1;
+
+
+    while ( min <= max )
+    {
+      FT_Int    mid = min + ( max - min ) / 2;
+      FT_Byte*  p   = base_glyph_begin + mid * BASE_GLYPH_SIZE;
+
+      FT_UShort  gid = FT_NEXT_USHORT( p );
+
+
+      if ( gid < glyph_id )
+        min = mid + 1;
+      else if (gid > glyph_id )
+        max = mid - 1;
+      else
+      {
+        record->gid                = gid;
+        record->layer_array_offset = FT_NEXT_ULONG ( p );
+        return 1;
+      }
+    }
+
+    return 0;
+  }
+
   FT_LOCAL_DEF ( FT_Bool )
   tt_face_get_colr_layer_gradients ( TT_Face           face,
                                      FT_UInt           base_glyph,
+                                     FT_UInt *         aglyph_index,
                                      FT_COLR_Paint *   paint,
                                      FT_LayerIterator *iterator )
   {
-    return 0;
+    Colr* colr = (Colr*)face->colr;
+    BaseGlyphV1Record base_glyph_v1_record;
+    FT_Byte* p;
+    FT_UInt gid;
+
+    if ( !iterator->p )
+    {
+      iterator->layer = 0;
+      if ( !find_base_glyph_v1_record ( colr->base_glyphs_v1,
+                                        colr->num_base_glyphs_v1,
+                                        base_glyph,
+                                        &base_glyph_v1_record ) )
+        return 0;
+
+      /* Try to find layer size to configure iterator */
+      if ( !base_glyph_v1_record.layer_array_offset ||
+           base_glyph_v1_record.layer_array_offset > colr->table_size )
+        return 0;
+
+      p = (FT_Byte *)( colr->table + base_glyph_v1_record.layer_array_offset );
+      iterator->num_layers = FT_NEXT_ULONG ( p );
+
+      if ( p > (FT_Byte *)( colr->table + colr->table_size ) )
+        return 0;
+
+      iterator->p = p;
+    }
+
+    if ( iterator->layer >= iterator->num_layers )
+      return 0;
+
+    /* We have an iterator pointing at a LayerV1Record */
+    p = iterator->p;
+
+    gid = FT_NEXT_ULONG(p);
+
+    if ( gid > ( FT_UInt ) ( FT_FACE ( face )->num_glyphs ) )
+      return 0;
+
+    *aglyph_index = gid;
+
+    /* TODO: Fill paint information. */
+
+    iterator->layer++;
+
+    return 1;
   }
 
   FT_LOCAL_DEF ( FT_Bool )

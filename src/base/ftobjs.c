@@ -5571,6 +5571,7 @@
   FT_EXPORT_DEF ( FT_Bool )
   FT_Get_Color_Glyph_Layer_Gradients ( FT_Face           face,
                                        FT_UInt           base_glyph,
+                                       FT_UInt *         aglyph_index,
                                        FT_COLR_Paint *   paint,
                                        FT_LayerIterator *iterator )
   {
@@ -5589,6 +5590,7 @@
     if ( sfnt->get_colr_layer )
       return sfnt->get_colr_layer_gradients ( ttface,
                                               base_glyph,
+                                              aglyph_index,
                                               paint,
                                               iterator );
     else

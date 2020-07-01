@@ -45,6 +45,7 @@ FT_BEGIN_HEADER
   FT_LOCAL ( FT_Bool )
   tt_face_get_colr_layer_gradients ( TT_Face           face,
                                      FT_UInt           base_glyph,
+                                     FT_UInt *         aglyph_index,
                                      FT_COLR_Paint *   paint,
                                      FT_LayerIterator *iterator );
 
