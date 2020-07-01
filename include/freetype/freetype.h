@@ -4204,13 +4204,13 @@ FT_BEGIN_HEADER
                             FT_UInt           *acolor_index,
                             FT_LayerIterator*  iterator );
 
-  typedef enum FT_COLR_PaintFormat_
+  typedef enum FT_PaintFormat_
   {
     COLR_PAINTFORMAT_SOLID           = 1,
     COLR_PAINTFORMAT_LINEAR_GRADIENT = 2,
     COLR_PAINTFORMAT_RADIAL_GRADIENT = 3,
     COLR_PAINTFORMAT_UNSUPPORTED     = 255
-  } FT_COLR_PaintFormat;
+  } FT_PaintFormat;
 
   typedef struct FT_ColorStopIterator_
   {
@@ -4228,7 +4228,7 @@ FT_BEGIN_HEADER
 
   typedef struct FT_PaintSolid_
   {
-    FT_COLR_PaintFormat format;
+    FT_PaintFormat format;
     FT_PaintColor color;
   } FT_PaintSolid;
 
@@ -4247,7 +4247,7 @@ FT_BEGIN_HEADER
 
   typedef struct FT_PaintLinearGradient_
   {
-    FT_COLR_PaintFormat  format;
+    FT_PaintFormat  format;
     FT_ColorLine         colorline;
     FT_Vector            p0;
     FT_Vector            p1;
@@ -4256,7 +4256,7 @@ FT_BEGIN_HEADER
 
   typedef union FT_COLR_Paint_
   {
-    FT_COLR_PaintFormat format;
+    FT_PaintFormat format;
     union {
       FT_PaintSolid solid;
       FT_PaintLinearGradient linear_gradient;
