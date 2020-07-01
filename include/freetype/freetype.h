@@ -4208,7 +4208,8 @@ FT_BEGIN_HEADER
   {
     COLR_PAINTFORMAT_SOLID           = 1,
     COLR_PAINTFORMAT_LINEAR_GRADIENT = 2,
-    COLR_PAINTFORMAT_RADIAL_GRADIENT = 3
+    COLR_PAINTFORMAT_RADIAL_GRADIENT = 3,
+    COLR_PAINTFORMAT_UNSUPPORTED     = 255
   } FT_COLR_PaintFormat;
 
   typedef struct FT_ColorStopIterator_
@@ -4253,14 +4254,25 @@ FT_BEGIN_HEADER
     FT_Vector            p2;
   } FT_PaintLinearGradient;
 
-  typedef union COLR_Paint_
+  typedef union FT_COLR_Paint_
   {
     FT_COLR_PaintFormat format;
     union {
       FT_PaintSolid solid;
       FT_PaintLinearGradient linear_gradient;
+      /* TODO: FT_PaintRadialGradient */
     } u;
-  } COLR_Paint;
+  } FT_COLR_Paint;
+
+  FT_EXPORT ( FT_Bool )
+  FT_Get_Color_Glyph_Layer_Gradients ( FT_Face           face,
+                                       FT_UInt           base_glyph,
+                                       FT_COLR_Paint *   paint,
+                                       FT_LayerIterator *iterator );
+
+  FT_EXPORT ( FT_Bool )
+  FT_Get_Colorline_Stops ( FT_PaintColor          color_stop,
+                           FT_ColorStopIterator *iterator );
 
   /**************************************************************************
    *
