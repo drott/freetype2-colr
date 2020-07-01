@@ -42,7 +42,18 @@ FT_BEGIN_HEADER
                           FT_UInt           *acolor_index,
                           FT_LayerIterator*  iterator );
 
-  FT_LOCAL( FT_Error )
+  FT_LOCAL ( FT_Bool )
+  tt_face_get_colr_layer_gradients ( TT_Face           face,
+                                     FT_UInt           base_glyph,
+                                     FT_COLR_Paint *   paint,
+                                     FT_LayerIterator *iterator );
+
+  FT_LOCAL ( FT_Bool )
+  tt_face_get_colorline_stops ( TT_Face               face,
+                                FT_PaintColor *       color_stop,
+                                FT_ColorStopIterator *iterator );
+
+  FT_LOCAL ( FT_Error )
   tt_face_colr_blend_layer( TT_Face       face,
                             FT_UInt       color_index,
                             FT_GlyphSlot  dstSlot,
