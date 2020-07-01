@@ -4177,6 +4177,30 @@ FT_BEGIN_HEADER
                             FT_LayerIterator*  iterator );
 
 
+  typedef enum  COLR_PaintFormat_
+  {
+    COLR_PAINTFORMAT_SOLID           = 1,
+    COLR_PAINTFORMAT_LINEAR_GRADIENT = 2,
+    COLR_PAINTFORMAT_RADIAL_GRADIENT = 3
+
+  } COLR_PaintFormat;
+
+
+  typedef struct  FT_ColorStopIterator_
+  {
+    FT_UInt   num_color_stops;
+    FT_UInt   current_color_stop;
+    FT_Byte*  p;
+
+  } FT_ColorStopIterator;
+
+
+  typedef union COLR_Paint_
+  {
+    FT_UInt16 format;
+
+  } COLR_Paint;
+
   /**************************************************************************
    *
    * @section:
@@ -4244,7 +4268,6 @@ FT_BEGIN_HEADER
 #define FT_FSTYPE_NO_SUBSETTING                 0x0100
 #define FT_FSTYPE_BITMAP_EMBEDDING_ONLY         0x0200
 
-
   /**************************************************************************
    *
    * @function:
@@ -4268,8 +4291,7 @@ FT_BEGIN_HEADER
    * @since:
    *   2.3.8
    */
-  FT_EXPORT( FT_UShort )
-  FT_Get_FSType_Flags( FT_Face  face );
+  FT_EXPORT (FT_UShort) FT_Get_FSType_Flags (FT_Face face);
 
 
   /**************************************************************************
