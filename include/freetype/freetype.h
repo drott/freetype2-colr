@@ -4195,7 +4195,7 @@ FT_BEGIN_HEADER
   typedef struct FT_PaintColor_
   {
     FT_UInt16  palette_index;
-    FT_F2Dot14 transparency;
+    FT_F2Dot14 alpha;
   } FT_PaintColor;
 
   typedef struct FT_PaintSolid_
