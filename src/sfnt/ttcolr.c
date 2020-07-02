@@ -5,7 +5,7 @@
  *   TrueType and OpenType colored glyph layer support (body).
  *
  * Copyright (C) 2018-2020 by
- * David Turner, Robert Wilhelm, and Werner Lemberg.
+ * David Turner, Robert Wilhelm, Dominik Röttsches and Werner Lemberg.
  *
  * Originally written by Shao Yu Zhang <shaozhang@fb.com>.
  *
