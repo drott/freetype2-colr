@@ -40,7 +40,9 @@
 
   /* NOTE: These are the table sizes calculated through the specs. */
 #define BASE_GLYPH_SIZE            6
+/* TODO, change BASE_GLYPH_V1_SIZE to 8 when glyph ids actually become ULONGs */
 #define BASE_GLYPH_V1_SIZE         6
+#define LAYER_V1_RECORD_SIZE       6
 #define LAYER_SIZE                 4
 #define COLR_HEADER_SIZE          14
 
@@ -294,6 +296,36 @@
   }
 
   static FT_Bool
+  read_paint ( Colr *         colr,
+               FT_Byte *      layer_v1_array,
+               FT_ULong       paint_offset,
+               FT_COLR_Paint *apaint )
+  {
+    FT_Byte *p;
+    p              = layer_v1_array + paint_offset;
+    apaint->format = FT_NEXT_USHORT ( p );
+    if ( apaint->format == COLR_PAINTFORMAT_LINEAR_GRADIENT )
+    {
+      /* drop colorline */
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p0.x = FT_NEXT_SHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p0.y = FT_NEXT_SHORT ( p );
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p1.x = FT_NEXT_SHORT ( p );
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p1.y = FT_NEXT_SHORT ( p );
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p2.x = FT_NEXT_SHORT ( p );
+      FT_NEXT_ULONG ( p );
+      apaint->u.linear_gradient.p2.y = FT_NEXT_SHORT ( p );
+      FT_NEXT_ULONG ( p );
+    }
+    return 1;
+  }
+
+  static FT_Bool
   find_base_glyph_v1_record ( FT_Byte *          base_glyph_begin,
                               FT_Int             num_base_glyph,
                               FT_UInt            glyph_id,
@@ -337,7 +369,7 @@
   {
     Colr* colr = (Colr*)face->colr;
     BaseGlyphV1Record base_glyph_v1_record;
-    FT_Byte* p;
+    FT_Byte *         p, *layer_v1_array;
     FT_UInt gid;
 
     if ( colr->version < 1 || !colr->num_base_glyphs_v1 ||
@@ -374,18 +406,22 @@
     /* We have an iterator pointing at a LayerV1Record */
     p = iterator->p;
 
+
+    /* reverse to layer_v1_array, TODO */
+    /* TODO: More checks on this one. */
+    layer_v1_array = p - iterator->layer * LAYER_V1_RECORD_SIZE - 4 /* array size */;
+
     /* TODO: incorrect in file, is a short, should be a long, gid = FT_NEXT_ULONG(p); */
     gid = FT_NEXT_USHORT(p);
-    /* Skip paint for now, see TODO below. */
-    FT_NEXT_ULONG(p);
 
     if ( gid > ( FT_UInt ) ( FT_FACE ( face )->num_glyphs ) )
       return 0;
 
+    if ( !read_paint ( colr, layer_v1_array, FT_NEXT_ULONG ( p ), paint ) )
+      return 0;
+
     *aglyph_index = gid;
     iterator->p = p;
-
-    /* TODO: Fill paint information. */
 
     iterator->layer++;
 
