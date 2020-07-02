@@ -40,7 +40,7 @@
 
   /* NOTE: These are the table sizes calculated through the specs. */
 #define BASE_GLYPH_SIZE            6U
-#define BASE_GLYPH_V1_SIZE         8U
+#define BASE_GLYPH_V1_SIZE         6U
 #define LAYER_SIZE                 4U
 #define COLR_HEADER_SIZE          14U
 
@@ -96,12 +96,13 @@
     FT_Error   error;
     FT_Memory  memory = face->root.memory;
 
-    FT_Byte*  table = NULL;
-    FT_Byte*  p     = NULL;
+    FT_Byte *table = NULL;
+    FT_Byte *p = NULL;
 
     Colr*  colr = NULL;
 
-    FT_ULong  base_glyph_offset, layer_offset, base_glyphs_v1_offset;
+    FT_ULong base_glyph_offset, layer_offset, base_glyphs_v1_offset,
+        num_base_glyphs_v1;
     FT_ULong  table_size;
 
 
@@ -152,13 +153,15 @@
         goto InvalidTable;
 
       p = (FT_Byte*)( table + base_glyphs_v1_offset );
-      colr->num_base_glyphs_v1 = FT_NEXT_ULONG( p );
+      num_base_glyphs_v1 = FT_PEEK_ULONG( p );
 
-      if ( colr->num_base_glyphs_v1 * BASE_GLYPH_V1_SIZE >
+      if ( num_base_glyphs_v1 * BASE_GLYPH_V1_SIZE >
            table_size - base_glyphs_v1_offset )
+      {
         goto InvalidTable;
-
-      colr->base_glyphs_v1 = p;
+      }
+      colr->num_base_glyphs_v1 = num_base_glyphs_v1;
+      colr->base_glyphs_v1     = p;
     }
 
     colr->base_glyphs = (FT_Byte*)( table + base_glyph_offset );
@@ -303,10 +306,12 @@
     while ( min <= max )
     {
       FT_Int    mid = min + ( max - min ) / 2;
-      FT_Byte*  p   = base_glyph_begin + mid * BASE_GLYPH_V1_SIZE;
+      /* base_glyph_begin is the beginning of the BaseGlyphV1Array, skip the
+       * array length by adding 4 to start binary search in layers. */
+      FT_Byte * p   = base_glyph_begin + 4 + mid * BASE_GLYPH_V1_SIZE;
 
+      /* TODO: broken in test font, this should be a long, change BASE_GLYPH_V1_SIZE accordingly back to 8, from 6. */
       FT_UShort  gid = FT_NEXT_USHORT( p );
-
 
       if ( gid < glyph_id )
         min = mid + 1;
@@ -369,12 +374,16 @@
     /* We have an iterator pointing at a LayerV1Record */
     p = iterator->p;
 
-    gid = FT_NEXT_ULONG(p);
+    /* TODO: incorrect in file, is a short, should be a long, gid = FT_NEXT_ULONG(p); */
+    gid = FT_NEXT_USHORT(p);
+    /* Skip paint for now, see TODO below. */
+    FT_NEXT_ULONG(p);
 
     if ( gid > ( FT_UInt ) ( FT_FACE ( face )->num_glyphs ) )
       return 0;
 
     *aglyph_index = gid;
+    iterator->p = p;
 
     /* TODO: Fill paint information. */
 
