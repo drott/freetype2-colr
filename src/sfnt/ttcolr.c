@@ -302,8 +302,13 @@
                FT_COLR_Paint *apaint )
   {
     FT_Byte *p;
-    p              = layer_v1_array + paint_offset;
+    p = layer_v1_array + paint_offset;
+
     apaint->format = FT_NEXT_USHORT ( p );
+
+    if ( apaint->format >= COLR_PAINT_FORMAT_MAX )
+      return 0;
+
     if ( apaint->format == COLR_PAINTFORMAT_LINEAR_GRADIENT )
     {
       /* drop colorline */
