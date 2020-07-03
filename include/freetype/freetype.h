@@ -4254,29 +4254,29 @@ FT_BEGIN_HEADER
 
   typedef struct FT_PaintLinearGradient_
   {
-    FT_PaintFormat  format;
-    FT_ColorLine         colorline;
-    FT_Vector            p0;
-    FT_Vector            p1;
-    FT_Vector            p2;
+    FT_PaintFormat format;
+    FT_ColorLine   colorline;
+    FT_Vector      p0;
+    FT_Vector      p1;
+    FT_Vector      p2;
   } FT_PaintLinearGradient;
 
   typedef struct FT_PaintRadialGradient_
   {
-    FT_PaintFormat       format;
-    FT_ColorLine         colorline;
-    FT_Vector            c0;
-    FT_Vector            c1;
-    FT_UShort            r0;
-    FT_UShort            r1;
-    FT_Matrix            affine;
+    FT_PaintFormat format;
+    FT_ColorLine   colorline;
+    FT_Vector      c0;
+    FT_Vector      c1;
+    FT_UShort      r0;
+    FT_UShort      r1;
+    FT_Matrix      affine;
   } FT_PaintRadialGradient;
 
   typedef union FT_COLR_Paint_
   {
     FT_PaintFormat format;
     union {
-      FT_PaintSolid solid;
+      FT_PaintSolid          solid;
       FT_PaintLinearGradient linear_gradient;
       FT_PaintRadialGradient radial_gradient;
     } u;
