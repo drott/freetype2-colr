@@ -4241,6 +4241,7 @@ FT_BEGIN_HEADER
     FT_Vector            c1;
     FT_UShort            r0;
     FT_UShort            r1;
+    FT_Matrix            affine;
   } FT_PaintRadialGradient;
 
   typedef union FT_COLR_Paint_
@@ -4249,7 +4250,7 @@ FT_BEGIN_HEADER
     union {
       FT_PaintSolid solid;
       FT_PaintLinearGradient linear_gradient;
-      /* TODO: FT_PaintRadialGradient */
+      FT_PaintRadialGradient radial_gradient;
     } u;
   } FT_COLR_Paint;
 

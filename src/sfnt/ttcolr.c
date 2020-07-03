@@ -320,6 +320,27 @@
   }
 
   static FT_Bool
+  read_affine ( Colr *     colr,
+                FT_Byte *  paint_base,
+                FT_ULong   affine_offset,
+                FT_Matrix *affine )
+  {
+    FT_Byte *p = (FT_Byte *)( paint_base + affine_offset );
+    /* TODO: Check pointer limits against colr->table etc. */
+
+    affine->xx = FT_NEXT_LONG ( p );
+    FT_NEXT_ULONG ( p ); /* drop varIdx */
+    affine->xy = FT_NEXT_LONG ( p );
+    FT_NEXT_ULONG ( p ); /* drop varIdx */
+    affine->yx = FT_NEXT_LONG ( p );
+    FT_NEXT_ULONG ( p ); /* drop varIdx */
+    affine->yy = FT_NEXT_LONG ( p );
+    FT_NEXT_ULONG ( p ); /* drop varIdx */
+
+    return 1;
+  }
+
+  static FT_Bool
   read_paint ( Colr *         colr,
                FT_Byte *      layer_v1_array,
                FT_ULong       paint_offset,
@@ -342,8 +363,7 @@
       /* skip VarIdx */
       FT_NEXT_ULONG ( p );
     }
-
-    if ( apaint->format == COLR_PAINTFORMAT_LINEAR_GRADIENT )
+    else if ( apaint->format == COLR_PAINTFORMAT_LINEAR_GRADIENT )
     {
       FT_ULong color_line_offset = 0;
       color_line_offset = FT_NEXT_ULONG ( p );
@@ -365,7 +385,55 @@
       FT_NEXT_ULONG ( p );
       apaint->u.linear_gradient.p2.y = FT_NEXT_SHORT ( p );
       FT_NEXT_ULONG ( p );
+    } else if ( apaint->format == COLR_PAINTFORMAT_RADIAL_GRADIENT )
+    {
+      FT_ULong color_line_offset = 0;
+      FT_ULong affine_offset = 0;
+
+      color_line_offset = FT_NEXT_ULONG ( p );
+      if ( !read_color_line ( colr,
+                              paint_base,
+                              color_line_offset,
+                              &apaint->u.linear_gradient.colorline ) )
+        return 0;
+
+      apaint->u.radial_gradient.c0.x = FT_NEXT_SHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+      apaint->u.radial_gradient.c0.y = FT_NEXT_SHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+      apaint->u.radial_gradient.c1.x = FT_NEXT_SHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+      apaint->u.radial_gradient.c1.y = FT_NEXT_SHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+
+      apaint->u.radial_gradient.r0 = FT_NEXT_USHORT ( p );
+      FT_NEXT_ULONG ( p );
+
+      apaint->u.radial_gradient.r1 = FT_NEXT_USHORT ( p );
+      FT_NEXT_ULONG ( p );
+
+      affine_offset = FT_NEXT_ULONG ( p );
+
+      if ( !affine_offset )
+        return 1;
+
+      /* TODO: Is there something like a const FT_Matrix_Unity? */
+      apaint->u.radial_gradient.affine.xx = 1;
+      apaint->u.radial_gradient.affine.xy = 0;
+      apaint->u.radial_gradient.affine.yx = 1;
+      apaint->u.radial_gradient.affine.yy = 0;
+
+      if ( !read_affine ( colr,
+                          paint_base,
+                          affine_offset,
+                          &apaint->u.radial_gradient.affine ) )
+        return 0;
     }
+
     return 1;
   }
 
@@ -386,7 +454,8 @@
        * array length by adding 4 to start binary search in layers. */
       FT_Byte * p   = base_glyph_begin + 4 + mid * BASE_GLYPH_V1_SIZE;
 
-      /* TODO: broken in test font, this should be a long, change BASE_GLYPH_V1_SIZE accordingly back to 8, from 6. */
+      /* TODO: broken in test font, this should be a long, change
+       * BASE_GLYPH_V1_SIZE accordingly back to 8, from 6. */
       FT_UShort  gid = FT_NEXT_USHORT( p );
 
       if ( gid < glyph_id )
@@ -455,7 +524,8 @@
     /* TODO: More checks on this one. */
     layer_v1_array = p - iterator->layer * LAYER_V1_RECORD_SIZE - 4 /* array size */;
 
-    /* TODO: incorrect in file, is a short, should be a long, gid = FT_NEXT_ULONG(p); */
+    /* TODO: incorrect in file, is a short, should be a long, gid =
+     * FT_NEXT_ULONG(p); */
     gid = FT_NEXT_USHORT(p);
 
     if ( gid > ( FT_UInt ) ( FT_FACE ( face )->num_glyphs ) )
