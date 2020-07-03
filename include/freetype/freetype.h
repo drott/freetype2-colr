@@ -4199,6 +4199,12 @@ FT_BEGIN_HEADER
     FT_F2Dot14 alpha;
   } FT_PaintColor;
 
+  typedef struct FT_ColorStop_
+  {
+    FT_F2Dot14    stop_offset;
+    FT_PaintColor color;
+  } FT_ColorStop;
+
   typedef struct FT_PaintSolid_
   {
     FT_PaintFormat format;
@@ -4215,7 +4221,7 @@ FT_BEGIN_HEADER
   typedef struct FT_ColorLine_
   {
     FT_PaintExtend       extend;
-    FT_ColorStopIterator colorline;
+    FT_ColorStopIterator color_stop_iterator;
   } FT_ColorLine;
 
   typedef struct FT_PaintLinearGradient_
@@ -4246,7 +4252,7 @@ FT_BEGIN_HEADER
 
   FT_EXPORT ( FT_Bool )
   FT_Get_Colorline_Stops ( FT_Face               face,
-                           FT_PaintColor *       color_stop,
+                           FT_ColorStop *       color_stop,
                            FT_ColorStopIterator *iterator );
 
   /**************************************************************************
