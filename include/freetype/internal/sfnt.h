@@ -531,9 +531,7 @@ FT_BEGIN_HEADER
       FT_LayerIterator *iterator );
 
   typedef FT_Bool ( *TT_Get_Colorline_Stops_Func ) (
-      TT_Face               face,
-      FT_PaintColor *       color_stop,
-      FT_ColorStopIterator *iterator );
+      TT_Face face, FT_ColorStop *color_stop, FT_ColorStopIterator *iterator );
 
   /**************************************************************************
    *

@@ -296,13 +296,38 @@
   }
 
   static FT_Bool
+  read_color_line ( Colr *        colr,
+                    FT_Byte *     paint_base,
+                    FT_ULong      colorline_offset,
+                    FT_ColorLine *colorline )
+  {
+    FT_Byte *      p = (FT_Byte *)( paint_base + colorline_offset );
+    FT_PaintExtend paint_extend;
+    /* TODO: Check pointer limits. */
+
+    paint_extend = FT_NEXT_USHORT ( p );
+    if ( paint_extend > COLR_PAINT_EXTEND_REFLECT )
+      return 0;
+
+    colorline->extend = paint_extend;
+
+    colorline->color_stop_iterator.num_color_stops    = FT_NEXT_USHORT ( p );
+    colorline->color_stop_iterator.p                  = p;
+    colorline->color_stop_iterator.current_color_stop = 0;
+
+    return 1;
+  }
+
+  static FT_Bool
   read_paint ( Colr *         colr,
                FT_Byte *      layer_v1_array,
                FT_ULong       paint_offset,
                FT_COLR_Paint *apaint )
   {
-    FT_Byte *p;
-    p = layer_v1_array + paint_offset;
+    FT_Byte *p, *paint_base;
+
+    p          = layer_v1_array + paint_offset;
+    paint_base = p;
 
     apaint->format = FT_NEXT_USHORT ( p );
 
@@ -311,8 +336,13 @@
 
     if ( apaint->format == COLR_PAINTFORMAT_LINEAR_GRADIENT )
     {
-      /* drop colorline */
-      FT_NEXT_ULONG ( p );
+      FT_ULong color_line_offset = 0;
+      color_line_offset = FT_NEXT_ULONG ( p );
+      if ( !read_color_line ( colr,
+                              paint_base,
+                              color_line_offset,
+                              &apaint->u.linear_gradient.colorline ) )
+        return 0;
       apaint->u.linear_gradient.p0.x = FT_NEXT_SHORT ( p );
       /* skip VarIdx */
       FT_NEXT_ULONG ( p );
@@ -435,7 +465,7 @@
 
   FT_LOCAL_DEF ( FT_Bool )
   tt_face_get_colorline_stops ( TT_Face               face,
-                                FT_PaintColor *       color_stop,
+                                FT_ColorStop *        color_stop,
                                 FT_ColorStopIterator *iterator )
   {
     return 0;
