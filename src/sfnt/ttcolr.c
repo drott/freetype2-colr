@@ -335,6 +335,14 @@
     if ( apaint->format >= COLR_PAINT_FORMAT_MAX )
       return 0;
 
+    if ( apaint->format == COLR_PAINTFORMAT_SOLID )
+    {
+      apaint->u.solid.color.palette_index = FT_NEXT_USHORT ( p );
+      apaint->u.solid.color.alpha = FT_NEXT_USHORT ( p );
+      /* skip VarIdx */
+      FT_NEXT_ULONG ( p );
+    }
+
     if ( apaint->format == COLR_PAINTFORMAT_LINEAR_GRADIENT )
     {
       FT_ULong color_line_offset = 0;

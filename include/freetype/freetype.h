@@ -4233,6 +4233,16 @@ FT_BEGIN_HEADER
     FT_Vector            p2;
   } FT_PaintLinearGradient;
 
+  typedef struct FT_PaintRadialGradient_
+  {
+    FT_PaintFormat       format;
+    FT_ColorLine         colorline;
+    FT_Vector            c0;
+    FT_Vector            c1;
+    FT_UShort            r0;
+    FT_UShort            r1;
+  } FT_PaintRadialGradient;
+
   typedef union FT_COLR_Paint_
   {
     FT_PaintFormat format;
