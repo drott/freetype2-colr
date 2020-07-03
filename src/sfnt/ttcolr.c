@@ -43,6 +43,7 @@
 /* TODO, change BASE_GLYPH_V1_SIZE to 8 when glyph ids actually become ULONGs */
 #define BASE_GLYPH_V1_SIZE         6
 #define LAYER_V1_RECORD_SIZE       6
+#define COLOR_STOP_SIZE            6
 #define LAYER_SIZE                 4
 #define COLR_HEADER_SIZE          14
 
@@ -468,7 +469,31 @@
                                 FT_ColorStop *        color_stop,
                                 FT_ColorStopIterator *iterator )
   {
-    return 0;
+    Colr* colr = (Colr*)face->colr;
+    FT_Byte *p;
+
+    if ( iterator->current_color_stop >= iterator->num_color_stops )
+      return 0;
+
+    if ( iterator->p +
+             ( ( iterator->num_color_stops - iterator->current_color_stop ) *
+               COLOR_STOP_SIZE ) >
+         (FT_Byte *)( colr->table + colr->table_size ) )
+      return 0;
+
+    /* Iterator points at first ColorStop of ColorLine */
+    p = iterator->p;
+
+    color_stop->stop_offset         = FT_NEXT_USHORT ( p );
+    FT_NEXT_ULONG ( p ); /* skip varIdx */
+    color_stop->color.palette_index = FT_NEXT_USHORT ( p );
+    color_stop->color.alpha         = FT_NEXT_USHORT ( p );
+    FT_NEXT_ULONG ( p ); /* skip varIdx */
+
+    iterator->p = p;
+    iterator->current_color_stop++;
+
+    return 1;
   }
 
   FT_LOCAL_DEF( FT_Error )
