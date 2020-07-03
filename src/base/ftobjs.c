@@ -5578,7 +5578,7 @@
 
   FT_EXPORT_DEF ( FT_Bool )
   FT_Get_Colorline_Stops ( FT_Face               face,
-                           FT_PaintColor *       color_stop,
+                           FT_ColorStop *        color_stop,
                            FT_ColorStopIterator *iterator )
   {
     TT_Face       ttface;
