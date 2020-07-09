@@ -4256,6 +4256,7 @@ FT_BEGIN_HEADER
   {
     FT_PaintFormat format;
     FT_ColorLine   colorline;
+    /* TODO: Potentially expose those as x0, y0 etc. */
     FT_Vector      p0;
     FT_Vector      p1;
     FT_Vector      p2;
@@ -4265,9 +4266,10 @@ FT_BEGIN_HEADER
   {
     FT_PaintFormat format;
     FT_ColorLine   colorline;
+    /* TODO: Potentially expose those as x0, y0 etc. */
     FT_Vector      c0;
-    FT_Vector      c1;
     FT_UShort      r0;
+    FT_Vector      c1;
     FT_UShort      r1;
     FT_Matrix      affine;
   } FT_PaintRadialGradient;
