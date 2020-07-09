@@ -4204,6 +4204,16 @@ FT_BEGIN_HEADER
                             FT_UInt           *acolor_index,
                             FT_LayerIterator*  iterator );
 
+  /**************************************************************************
+   *
+   * @enum:
+   *   FT_PaintFormat
+   *
+   * @description:
+   *   Enumeration describing the different gradient types of the v1
+   *   extensions to the COLR table.
+   *
+   */
   typedef enum FT_PaintFormat_
   {
     COLR_PAINTFORMAT_SOLID           = 1,
@@ -4213,6 +4223,26 @@ FT_BEGIN_HEADER
     COLR_PAINTFORMAT_UNSUPPORTED     = 255
   } FT_PaintFormat;
 
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_ColorStopIterator
+   *
+   * @description:
+   *   This iterator object is needed for @FT_Get_Colorline_Stops.
+   *
+   * @fields:
+   *   num_colors ::
+   *     The number of color stops for the requested glyph index.  Will be
+   *     set by @FT_Get_Colorline_Stops .
+   *
+   *   current_color_stop ::
+   *     The current color stop.  Will be set by @FT_Get_Colorline_Stops.
+   *
+   *   p ::
+   *     An opaque pointer into 'COLR' table data.  The caller must set this
+   *     to `NULL` before the first call of @FT_Get_Colorline_Stops.
+   */
   typedef struct FT_ColorStopIterator_
   {
     FT_UInt   num_color_stops;
@@ -4221,24 +4251,60 @@ FT_BEGIN_HEADER
 
   } FT_ColorStopIterator;
 
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_PaintColor
+   *
+   * @description:
+   *   Struct representing a ColorIndex of the COLR v1 extensions,
+   *   see https://github.com/googlefonts/colr-gradients-spec
+   *
+   * @fields:
+   *   palette_index ::
+   *     The palette index into a CPAL palette.
+   *
+   *   alpha ::
+   *     Alpha transparency value applied on top of the value from CPAL
+   */
   typedef struct FT_PaintColor_
   {
     FT_UInt16  palette_index;
     FT_F2Dot14 alpha;
   } FT_PaintColor;
 
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_ColorStop
+   *
+   * @description:
+   *   Struct representing a ColorStop of the COLR v1 extensions,
+   *   see https://github.com/googlefonts/colr-gradients-spec
+   *
+   * @fields:
+   *   stop_offset ::
+   *     The stop offset between 0 and 1 along the gradient.
+   *
+   *   color ::
+   *     The color information for this stop, see @FT_PaintColor.
+   */
   typedef struct FT_ColorStop_
   {
     FT_F2Dot14    stop_offset;
     FT_PaintColor color;
   } FT_ColorStop;
 
-  typedef struct FT_PaintSolid_
-  {
-    FT_PaintFormat format;
-    FT_PaintColor color;
-  } FT_PaintSolid;
-
+  /**************************************************************************
+   *
+   * @enum:
+   *   FT_PaintExtent
+   *
+   * @description:
+   *   Enumeration representing the Extend mode of the COLR v1 extensions,
+   *   see https://github.com/googlefonts/colr-gradients-spec
+   *   Describes how the gradient fill continues at the other boundaries.
+   */
   typedef enum FT_PaintExtend_
   {
     COLR_PAINT_EXTEND_PAD     = 0,
@@ -4246,12 +4312,84 @@ FT_BEGIN_HEADER
     COLR_PAINT_EXTEND_REFLECT = 2
   } FT_PaintExtend;
 
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_PaintSolid
+   *
+   * @description:
+   *   Struct representing a PaintSolid of the COLR v1 extensions,
+   *   see https://github.com/googlefonts/colr-gradients-spec
+   *   Means that the glyph layer filled with this paint will be
+   *   solid colored and not contain a gradient.
+   *
+   *
+   * @fields:
+   *   format ::
+   *     The gradient format for this Paint structure, see @FT_ColorPaint.
+   *
+   *   color ::
+   *     The color information for this solid paint, see @FT_PaintColor.
+   */
+  typedef struct FT_PaintSolid_
+  {
+    FT_PaintFormat format;
+    FT_PaintColor color;
+  } FT_PaintSolid;
+
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_ColorLine
+   *
+   * @description:
+   *   Struct representing a ColorLine of the COLR v1 extensions,
+   *   see https://github.com/googlefonts/colr-gradients-spec
+   *   Describes a list of color stops along the defined gradient.
+   *
+   * @fields:
+   *   extend ::
+   *     The extend mode at the outer boundaries, see @FT_PaintExtend.
+   *
+   *   color_stop_iterator ::
+   *     The @FT_ColorStopIterator used to enumerate and retrieve the
+   *     actual @FT_ColorStop's.
+   */
   typedef struct FT_ColorLine_
   {
     FT_PaintExtend       extend;
     FT_ColorStopIterator color_stop_iterator;
   } FT_ColorLine;
 
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_PaintLinearGradient
+   *
+   * @description:
+   *   Struct representing a PaintLinearGradient of the COLR v1 extensions,
+   *   see https://github.com/googlefonts/colr-gradients-spec
+   *   The glyph layer filled with this paint will be
+   *   filled with a linear gradient.
+   *
+   *
+   * @fields:
+   *   format ::
+   *     The gradient format for this Paint structure, see @FT_ColorPaint.
+   *
+   *   colorline ::
+   *     The @FT_ColorLine information for this pain, i.e. the list of color
+   *     stops along the gradient.
+   *
+   *   p0 ::
+   *     The starting point of the gradient definition in font units.
+   *
+   *   p1 ::
+   *     The starting point of the gradient definition in font units.
+   *
+   *   p2 ::
+   *     Optional point p2 to rotate the gradient. Otherwise equal to p0.
+   */
   typedef struct FT_PaintLinearGradient_
   {
     FT_PaintFormat format;
@@ -4262,6 +4400,42 @@ FT_BEGIN_HEADER
     FT_Vector      p2;
   } FT_PaintLinearGradient;
 
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_PaintRadialGradient
+   *
+   * @description:
+   *   Struct representing a PaintRadialGradient of the COLR v1 extensions,
+   *   see https://github.com/googlefonts/colr-gradients-spec
+   *   The glyph layer filled with this paint will be
+   *   filled with a radial gradient.
+   *
+   *
+   * @fields:
+   *   format ::
+   *     The gradient format for this Paint structure, see @FT_ColorPaint.
+   *
+   *   colorline ::
+   *     The @FT_ColorLine information for this pain, i.e. the list of color
+   *     stops along the gradient.
+   *
+   *   c0 ::
+   *     The center of the starting point of the radial gradient.
+   *
+   *   r0 ::
+   *     The radius of the starting circle of the radial gradient.
+   *
+   *   c1 ::
+   *     The center of the end point of the radial gradient.
+   *
+   *   r1 ::
+   *     The radius of the end circle of the radial gradient.
+   *
+   *   affine ::
+   *     An optional affine transformation matrix to transform the gradient
+   *     rendering.
+   */
   typedef struct FT_PaintRadialGradient_
   {
     FT_PaintFormat format;
@@ -4274,6 +4448,30 @@ FT_BEGIN_HEADER
     FT_Matrix      affine;
   } FT_PaintRadialGradient;
 
+  /**************************************************************************
+   *
+   * @union:
+   *   FT_COLR_Paint
+   *
+   * @description:
+   *   Struct representing the Paint union of the COLR v1 extensions,
+   *   see https://github.com/googlefonts/colr-gradients-spec
+   *   The glyph layer filled with this paint will be
+   *   filled with a radial gradient.
+   *
+   *
+   * @fields:
+   *   format ::
+   *     The gradient format for this Paint structure, see @FT_ColorPaint.
+   *
+   *   u ::
+   *     Union of @FT_PaintSolid, @FT_PaintLinearGradient or
+   *     @FT_PaintRadialGradient depending on format, see @FT_PaintFormat.
+   *     The suitable union member will be populated by
+   *     @FT_Get_Color_Glyph_Layer_Gradients, for example the
+   *     @FT_PaintLinearGradient member will be set if the format is a linear
+   *     gradient.
+   */
   typedef union FT_COLR_Paint_
   {
     FT_PaintFormat format;
@@ -4284,6 +4482,46 @@ FT_BEGIN_HEADER
     } u;
   } FT_COLR_Paint;
 
+  /**************************************************************************
+   *
+   * @function:
+   *   FT_Get_Color_Glyph_Layer_Gradients
+   *
+   * @description:
+   *   This is an interface to color gradient information in a 'COLR' v1 table
+   *   in OpenType fonts to iteratively retrieve the gradient and solid fill
+   *   information for colored glyph layers for a specified glyph id.
+   *
+   *     https://github.com/googlefonts/colr-gradients-spec
+   *
+   * @input:
+   *   face ::
+   *     A handle to the parent face object.
+   *
+   *   base_glyph ::
+   *     The glyph index the colored glyph layers are associated with.
+   *
+   * @inout:
+   *   iterator ::
+   *     An @FT_LayerIterator object.  For the first call you should set
+   *     `iterator->p` to `NULL`.  For all following calls, simply use the
+   *     same object again.
+   *
+   * @output:
+   *   aglyph_index ::
+   *     The glyph index of the current layer.
+   *
+   *   paint ::
+   *     The @FT_COLR_Paint union specifying a paint format and further
+   *     gradient information in the union members.
+   *
+   *     The color palette can be retrieved with @FT_Palette_Select.
+   *
+   * @return:
+   *   Value~1 if everything is OK.  If there are no more layers (or if there
+   *   are no COLR v1 layers at all), value~0 gets returned.  In case of an error,
+   *   value~0 is returned also.
+   */
   FT_EXPORT ( FT_Bool )
   FT_Get_Color_Glyph_Layer_Gradients ( FT_Face           face,
                                        FT_UInt           base_glyph,
@@ -4291,6 +4529,36 @@ FT_BEGIN_HEADER
                                        FT_COLR_Paint *   paint,
                                        FT_LayerIterator *iterator );
 
+  /**************************************************************************
+   *
+   * @function:
+   *   FT_Get_Colorline_Stops
+   *
+   * @description:
+   *   This is an interface to color gradient information in a 'COLR' v1 table
+   * in OpenType fonts to iteratively retrieve the gradient and solid fill
+   * information for colored glyph layers for a specified glyph id.
+   *
+   *     https://github.com/googlefonts/colr-gradients-spec
+   *
+   * @input:
+   *   face ::
+   *     A handle to the parent face object.
+   *
+   * @inout:
+   *   iterator ::
+   *     The @FT_ColorStopIterator retrieved configured on an @FT_ColorLine,
+   *     retrieved via paint information in
+   *     @FT_Get_Color_Glyph_Layer_Gradients.
+   *
+   * @output:
+   *   color_stop ::
+   *     Color index and alpha value for the retrieved color stop.
+   *
+   * @return:
+   *   Value~1 if everything is OK.  If there are no more color stops, value~0
+   *   gets returned. In case of an error, value~0 is returned also.
+   */
   FT_EXPORT ( FT_Bool )
   FT_Get_Colorline_Stops ( FT_Face               face,
                            FT_ColorStop *       color_stop,
