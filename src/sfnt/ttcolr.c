@@ -40,7 +40,6 @@
 
   /* NOTE: These are the table sizes calculated through the specs. */
 #define BASE_GLYPH_SIZE            6
-/* TODO, change BASE_GLYPH_V1_SIZE to 8 when glyph ids actually become ULONGs */
 #define BASE_GLYPH_V1_SIZE         6
 #define LAYER_V1_RECORD_SIZE       6
 #define COLOR_STOP_SIZE            6
@@ -403,14 +402,15 @@
       apaint->u.radial_gradient.c0.y = FT_NEXT_SHORT ( p );
       /* skip VarIdx */
       FT_NEXT_ULONG ( p );
+
+      apaint->u.radial_gradient.r0 = FT_NEXT_USHORT ( p );
+      FT_NEXT_ULONG ( p );
+
       apaint->u.radial_gradient.c1.x = FT_NEXT_SHORT ( p );
       /* skip VarIdx */
       FT_NEXT_ULONG ( p );
       apaint->u.radial_gradient.c1.y = FT_NEXT_SHORT ( p );
       /* skip VarIdx */
-      FT_NEXT_ULONG ( p );
-
-      apaint->u.radial_gradient.r0 = FT_NEXT_USHORT ( p );
       FT_NEXT_ULONG ( p );
 
       apaint->u.radial_gradient.r1 = FT_NEXT_USHORT ( p );
@@ -454,8 +454,6 @@
        * array length by adding 4 to start binary search in layers. */
       FT_Byte * p   = base_glyph_begin + 4 + mid * BASE_GLYPH_V1_SIZE;
 
-      /* TODO: broken in test font, this should be a long, change
-       * BASE_GLYPH_V1_SIZE accordingly back to 8, from 6. */
       FT_UShort  gid = FT_NEXT_USHORT( p );
 
       if ( gid < glyph_id )
@@ -524,8 +522,6 @@
     /* TODO: More checks on this one. */
     layer_v1_array = p - iterator->layer * LAYER_V1_RECORD_SIZE - 4 /* array size */;
 
-    /* TODO: incorrect in file, is a short, should be a long, gid =
-     * FT_NEXT_ULONG(p); */
     gid = FT_NEXT_USHORT(p);
 
     if ( gid > ( FT_UInt ) ( FT_FACE ( face )->num_glyphs ) )
