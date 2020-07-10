@@ -523,15 +523,17 @@ FT_BEGIN_HEADER
                              FT_UInt           *acolor_index,
                              FT_LayerIterator*  iterator );
 
-  typedef FT_Bool ( *TT_Get_Color_Glyph_Layer_Gradients_Func ) (
-      TT_Face           face,
-      FT_UInt           base_glyph,
-      FT_UInt *         aglyph_index,
-      FT_COLR_Paint *   paint,
-      FT_LayerIterator *iterator );
+  typedef FT_Bool
+  ( *TT_Get_Color_Glyph_Layer_Gradients_Func ) ( TT_Face           face,
+                                                 FT_UInt           base_glyph,
+                                                 FT_UInt *         aglyph_index,
+                                                 FT_COLR_Paint *   paint,
+                                                 FT_LayerIterator *iterator );
 
-  typedef FT_Bool ( *TT_Get_Colorline_Stops_Func ) (
-      TT_Face face, FT_ColorStop *color_stop, FT_ColorStopIterator *iterator );
+  typedef FT_Bool
+  ( *TT_Get_Colorline_Stops_Func ) ( TT_Face face,
+                                     FT_ColorStop *color_stop,
+                                     FT_ColorStopIterator *iterator );
 
   /**************************************************************************
    *
@@ -564,10 +566,12 @@ FT_BEGIN_HEADER
    *   FreeType error code.  0 means success.  Returns an error if
    *   color_index is invalid or reallocation fails.
    */
-  typedef FT_Error ( *TT_Blend_Colr_Func ) ( TT_Face      face,
-                                             FT_UInt      color_index,
-                                             FT_GlyphSlot base_glyph,
-                                             FT_GlyphSlot new_glyph );
+  typedef FT_Error
+  (*TT_Blend_Colr_Func)( TT_Face       face,
+                         FT_UInt       color_index,
+                         FT_GlyphSlot  base_glyph,
+                         FT_GlyphSlot  new_glyph );
+
 
   /**************************************************************************
    *
@@ -592,9 +596,11 @@ FT_BEGIN_HEADER
    * @return:
    *   FreeType error code.  0 means success.
    */
-  typedef FT_Error ( *TT_Get_Name_Func ) ( TT_Face     face,
-                                           FT_UShort   nameid,
-                                           FT_String **name );
+  typedef FT_Error
+  (*TT_Get_Name_Func)( TT_Face      face,
+                       FT_UShort    nameid,
+                       FT_String**  name );
+
 
   /**************************************************************************
    *
@@ -624,10 +630,12 @@ FT_BEGIN_HEADER
    * @return:
    *   1 if there is either a win or apple entry (or both), 0 otheriwse.
    */
-  typedef FT_Bool ( *TT_Get_Name_ID_Func ) ( TT_Face   face,
-                                             FT_UShort nameid,
-                                             FT_Int *  win,
-                                             FT_Int *  apple );
+  typedef FT_Bool
+  (*TT_Get_Name_ID_Func)( TT_Face    face,
+                          FT_UShort  nameid,
+                          FT_Int    *win,
+                          FT_Int    *apple );
+
 
   /**************************************************************************
    *
@@ -651,7 +659,10 @@ FT_BEGIN_HEADER
    *   The function uses `face->goto_table` to seek the stream to the start
    *   of the table, except while loading the font directory.
    */
-  typedef FT_Error ( *TT_Load_Table_Func ) ( TT_Face face, FT_Stream stream );
+  typedef FT_Error
+  (*TT_Load_Table_Func)( TT_Face    face,
+                         FT_Stream  stream );
+
 
   /**************************************************************************
    *
@@ -665,7 +676,9 @@ FT_BEGIN_HEADER
    *   face ::
    *     A handle to the target face object.
    */
-  typedef void ( *TT_Free_Table_Func ) ( TT_Face face );
+  typedef void
+  (*TT_Free_Table_Func)( TT_Face  face );
+
 
   /*
    * @functype:
@@ -687,9 +700,11 @@ FT_BEGIN_HEADER
    * @return:
    *    The kerning value in font units.
    */
-  typedef FT_Int ( *TT_Face_GetKerningFunc ) ( TT_Face face,
-                                               FT_UInt left_glyph,
-                                               FT_UInt right_glyph );
+  typedef FT_Int
+  (*TT_Face_GetKerningFunc)( TT_Face  face,
+                             FT_UInt  left_glyph,
+                             FT_UInt  right_glyph );
+
 
   /**************************************************************************
    *
@@ -703,77 +718,77 @@ FT_BEGIN_HEADER
    * @fields:
    *   Check the various xxx_Func() descriptions for details.
    */
-  typedef struct SFNT_Interface_
+  typedef struct  SFNT_Interface_
   {
-    TT_Loader_GotoTableFunc goto_table;
+    TT_Loader_GotoTableFunc      goto_table;
 
-    TT_Init_Face_Func   init_face;
-    TT_Load_Face_Func   load_face;
-    TT_Done_Face_Func   done_face;
-    FT_Module_Requester get_interface;
+    TT_Init_Face_Func            init_face;
+    TT_Load_Face_Func            load_face;
+    TT_Done_Face_Func            done_face;
+    FT_Module_Requester          get_interface;
 
-    TT_Load_Any_Func load_any;
+    TT_Load_Any_Func             load_any;
 
     /* these functions are called by `load_face' but they can also  */
     /* be called from external modules, if there is a need to do so */
-    TT_Load_Table_Func   load_head;
-    TT_Load_Metrics_Func load_hhea;
-    TT_Load_Table_Func   load_cmap;
-    TT_Load_Table_Func   load_maxp;
-    TT_Load_Table_Func   load_os2;
-    TT_Load_Table_Func   load_post;
+    TT_Load_Table_Func           load_head;
+    TT_Load_Metrics_Func         load_hhea;
+    TT_Load_Table_Func           load_cmap;
+    TT_Load_Table_Func           load_maxp;
+    TT_Load_Table_Func           load_os2;
+    TT_Load_Table_Func           load_post;
 
-    TT_Load_Table_Func load_name;
-    TT_Free_Table_Func free_name;
+    TT_Load_Table_Func           load_name;
+    TT_Free_Table_Func           free_name;
 
     /* this field was called `load_kerning' up to version 2.1.10 */
-    TT_Load_Table_Func load_kern;
+    TT_Load_Table_Func           load_kern;
 
-    TT_Load_Table_Func load_gasp;
-    TT_Load_Table_Func load_pclt;
+    TT_Load_Table_Func           load_gasp;
+    TT_Load_Table_Func           load_pclt;
 
     /* see `ttload.h'; this field was called `load_bitmap_header' up to */
     /* version 2.1.10                                                   */
-    TT_Load_Table_Func load_bhed;
+    TT_Load_Table_Func           load_bhed;
 
-    TT_Load_SBit_Image_Func load_sbit_image;
+    TT_Load_SBit_Image_Func      load_sbit_image;
 
     /* see `ttpost.h' */
-    TT_Get_PS_Name_Func get_psname;
-    TT_Free_Table_Func  free_psnames;
+    TT_Get_PS_Name_Func          get_psname;
+    TT_Free_Table_Func           free_psnames;
 
     /* starting here, the structure differs from version 2.1.7 */
 
     /* this field was introduced in version 2.1.8, named `get_psname' */
-    TT_Face_GetKerningFunc get_kerning;
+    TT_Face_GetKerningFunc       get_kerning;
 
     /* new elements introduced after version 2.1.10 */
 
     /* load the font directory, i.e., the offset table and */
     /* the table directory                                 */
-    TT_Load_Table_Func   load_font_dir;
-    TT_Load_Metrics_Func load_hmtx;
+    TT_Load_Table_Func           load_font_dir;
+    TT_Load_Metrics_Func         load_hmtx;
 
-    TT_Load_Table_Func load_eblc;
-    TT_Free_Table_Func free_eblc;
+    TT_Load_Table_Func           load_eblc;
+    TT_Free_Table_Func           free_eblc;
 
-    TT_Set_SBit_Strike_Func     set_sbit_strike;
-    TT_Load_Strike_Metrics_Func load_strike_metrics;
+    TT_Set_SBit_Strike_Func      set_sbit_strike;
+    TT_Load_Strike_Metrics_Func  load_strike_metrics;
 
-    TT_Load_Table_Func     load_cpal;
-    TT_Load_Table_Func     load_colr;
-    TT_Free_Table_Func     free_cpal;
-    TT_Free_Table_Func     free_colr;
-    TT_Set_Palette_Func    set_palette;
-    TT_Get_Colr_Layer_Func get_colr_layer;
+    TT_Load_Table_Func           load_cpal;
+    TT_Load_Table_Func           load_colr;
+    TT_Free_Table_Func           free_cpal;
+    TT_Free_Table_Func           free_colr;
+    TT_Set_Palette_Func          set_palette;
+    TT_Get_Colr_Layer_Func       get_colr_layer;
     TT_Get_Color_Glyph_Layer_Gradients_Func get_colr_layer_gradients;
     TT_Get_Colorline_Stops_Func             get_colorline_stops;
-    TT_Blend_Colr_Func     colr_blend;
+    TT_Blend_Colr_Func           colr_blend;
 
-    TT_Get_Metrics_Func get_metrics;
+    TT_Get_Metrics_Func          get_metrics;
 
-    TT_Get_Name_Func    get_name;
-    TT_Get_Name_ID_Func get_name_id;
+    TT_Get_Name_Func             get_name;
+    TT_Get_Name_ID_Func          get_name_id;
 
   } SFNT_Interface;
 
