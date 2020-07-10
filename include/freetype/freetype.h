@@ -4211,7 +4211,8 @@ FT_BEGIN_HEADER
    *
    * @description:
    *   Enumeration describing the different gradient types of the v1
-   *   extensions to the COLR table.
+   *   extensions to the COLR table,
+   *   see https://github.com/googlefonts/colr-gradients-spec
    *
    */
   typedef enum FT_PaintFormat_
@@ -4229,7 +4230,10 @@ FT_BEGIN_HEADER
    *   FT_ColorStopIterator
    *
    * @description:
-   *   This iterator object is needed for @FT_Get_Colorline_Stops.
+   *   This iterator object is needed for @FT_Get_Colorline_Stops. It keeps
+   *   state while iterating over the stops of an @FT_ColorLine, representing
+   *   the ColorLine struct of the v1 extensions to COLR,
+   *   see https://github.com/googlefonts/colr-gradients-spec
    *
    * @fields:
    *   num_colors ::
@@ -4265,7 +4269,7 @@ FT_BEGIN_HEADER
    *     The palette index into a CPAL palette.
    *
    *   alpha ::
-   *     Alpha transparency value applied on top of the value from CPAL
+   *     Alpha transparency value multiplied with the value from CPAL.
    */
   typedef struct FT_PaintColor_
   {
@@ -4536,8 +4540,8 @@ FT_BEGIN_HEADER
    *
    * @description:
    *   This is an interface to color gradient information in a 'COLR' v1 table
-   * in OpenType fonts to iteratively retrieve the gradient and solid fill
-   * information for colored glyph layers for a specified glyph id.
+   *   in OpenType fonts to iteratively retrieve the gradient and solid fill
+   *   information for colored glyph layers for a specified glyph id.
    *
    *     https://github.com/googlefonts/colr-gradients-spec
    *
