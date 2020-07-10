@@ -4564,6 +4564,7 @@ FT_BEGIN_HEADER
                            FT_ColorStop *       color_stop,
                            FT_ColorStopIterator *iterator );
 
+
   /**************************************************************************
    *
    * @section:
@@ -4631,6 +4632,7 @@ FT_BEGIN_HEADER
 #define FT_FSTYPE_NO_SUBSETTING                 0x0100
 #define FT_FSTYPE_BITMAP_EMBEDDING_ONLY         0x0200
 
+
   /**************************************************************************
    *
    * @function:
@@ -4654,7 +4656,8 @@ FT_BEGIN_HEADER
    * @since:
    *   2.3.8
    */
-  FT_EXPORT (FT_UShort) FT_Get_FSType_Flags (FT_Face face);
+  FT_EXPORT( FT_UShort )
+  FT_Get_FSType_Flags( FT_Face  face );
 
 
   /**************************************************************************
