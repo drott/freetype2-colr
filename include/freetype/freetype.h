@@ -4330,7 +4330,7 @@ FT_BEGIN_HEADER
    *
    * @fields:
    *   format ::
-   *     The gradient format for this Paint structure, see @FT_ColorPaint.
+   *     The gradient format for this Paint structure, see @FT_COLR_Paint.
    *
    *   color ::
    *     The color information for this solid paint, see @FT_PaintColor.
@@ -4379,7 +4379,7 @@ FT_BEGIN_HEADER
    *
    * @fields:
    *   format ::
-   *     The gradient format for this Paint structure, see @FT_ColorPaint.
+   *     The gradient format for this Paint structure, see @FT_COLR_Paint.
    *
    *   colorline ::
    *     The @FT_ColorLine information for this pain, i.e. the list of color
@@ -4418,7 +4418,7 @@ FT_BEGIN_HEADER
    *
    * @fields:
    *   format ::
-   *     The gradient format for this Paint structure, see @FT_ColorPaint.
+   *     The gradient format for this Paint structure, see @FT_COLR_Paint.
    *
    *   colorline ::
    *     The @FT_ColorLine information for this pain, i.e. the list of color
@@ -4466,7 +4466,7 @@ FT_BEGIN_HEADER
    *
    * @fields:
    *   format ::
-   *     The gradient format for this Paint structure, see @FT_ColorPaint.
+   *     The gradient format for this Paint structure.
    *
    *   u ::
    *     Union of @FT_PaintSolid, @FT_PaintLinearGradient or
