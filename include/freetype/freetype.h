@@ -4302,7 +4302,7 @@ FT_BEGIN_HEADER
   /**************************************************************************
    *
    * @enum:
-   *   FT_PaintExtent
+   *   FT_PaintExtend
    *
    * @description:
    *   Enumeration representing the Extend mode of the COLR v1 extensions,
@@ -4329,15 +4329,11 @@ FT_BEGIN_HEADER
    *
    *
    * @fields:
-   *   format ::
-   *     The gradient format for this Paint structure, see @FT_COLR_Paint.
-   *
    *   color ::
    *     The color information for this solid paint, see @FT_PaintColor.
    */
   typedef struct FT_PaintSolid_
   {
-    FT_PaintFormat format;
     FT_PaintColor color;
   } FT_PaintSolid;
 
@@ -4378,9 +4374,6 @@ FT_BEGIN_HEADER
    *
    *
    * @fields:
-   *   format ::
-   *     The gradient format for this Paint structure, see @FT_COLR_Paint.
-   *
    *   colorline ::
    *     The @FT_ColorLine information for this pain, i.e. the list of color
    *     stops along the gradient.
@@ -4396,7 +4389,6 @@ FT_BEGIN_HEADER
    */
   typedef struct FT_PaintLinearGradient_
   {
-    FT_PaintFormat format;
     FT_ColorLine   colorline;
     /* TODO: Potentially expose those as x0, y0 etc. */
     FT_Vector      p0;
@@ -4417,9 +4409,6 @@ FT_BEGIN_HEADER
    *
    *
    * @fields:
-   *   format ::
-   *     The gradient format for this Paint structure, see @FT_COLR_Paint.
-   *
    *   colorline ::
    *     The @FT_ColorLine information for this pain, i.e. the list of color
    *     stops along the gradient.
@@ -4442,7 +4431,6 @@ FT_BEGIN_HEADER
    */
   typedef struct FT_PaintRadialGradient_
   {
-    FT_PaintFormat format;
     FT_ColorLine   colorline;
     /* TODO: Potentially expose those as x0, y0 etc. */
     FT_Vector      c0;
@@ -4476,7 +4464,7 @@ FT_BEGIN_HEADER
    *     @FT_PaintLinearGradient member will be set if the format is a linear
    *     gradient.
    */
-  typedef union FT_COLR_Paint_
+  typedef struct FT_COLR_Paint_
   {
     FT_PaintFormat format;
     union {
