@@ -327,6 +327,9 @@
     FT_Byte *p = (FT_Byte *)( paint_base + affine_offset );
     /* TODO: Check pointer limits against colr->table etc. */
 
+    if ( !affine_offset )
+      return 0;
+
     affine->xx = FT_NEXT_LONG ( p );
     FT_NEXT_ULONG ( p ); /* drop varIdx */
     affine->xy = FT_NEXT_LONG ( p );
@@ -418,19 +421,16 @@
 
       affine_offset = FT_NEXT_ULONG ( p );
 
+      apaint->u.radial_gradient.affine.xx = 1;
+      apaint->u.radial_gradient.affine.xy = 0;
+      apaint->u.radial_gradient.affine.yx = 0;
+      apaint->u.radial_gradient.affine.yy = 1;
+
       if ( !affine_offset )
         return 1;
 
-      /* TODO: Is there something like a const FT_Matrix_Unity? */
-      apaint->u.radial_gradient.affine.xx = 1;
-      apaint->u.radial_gradient.affine.xy = 0;
-      apaint->u.radial_gradient.affine.yx = 1;
-      apaint->u.radial_gradient.affine.yy = 0;
-
-      if ( !read_affine ( colr,
-                          paint_base,
-                          affine_offset,
-                          &apaint->u.radial_gradient.affine ) )
+      if ( !read_affine( colr, paint_base, affine_offset,
+                         &apaint->u.radial_gradient.affine ) )
         return 0;
     }
 
