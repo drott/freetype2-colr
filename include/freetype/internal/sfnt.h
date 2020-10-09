@@ -526,14 +526,18 @@ FT_BEGIN_HEADER
   typedef FT_Bool
   ( *TT_Get_Color_Glyph_Layer_Gradients_Func ) ( TT_Face           face,
                                                  FT_UInt           base_glyph,
-                                                 FT_UInt *         aglyph_index,
-                                                 FT_COLR_Paint *   paint,
+                                                 FT_OpaquePaint *   paint,
                                                  FT_LayerIterator *iterator );
 
   typedef FT_Bool
   ( *TT_Get_Colorline_Stops_Func ) ( TT_Face face,
                                      FT_ColorStop *color_stop,
                                      FT_ColorStopIterator *iterator );
+
+  typedef FT_Bool
+  ( *TT_Get_Paint_Func )( TT_Face        face,
+                          FT_OpaquePaint opaque_paint,
+                          FT_COLR_Paint* paint );
 
   /**************************************************************************
    *
@@ -783,6 +787,7 @@ FT_BEGIN_HEADER
     TT_Get_Colr_Layer_Func       get_colr_layer;
     TT_Get_Color_Glyph_Layer_Gradients_Func get_colr_layer_gradients;
     TT_Get_Colorline_Stops_Func             get_colorline_stops;
+    TT_Get_Paint_Func                       get_paint;
     TT_Blend_Colr_Func           colr_blend;
 
     TT_Get_Metrics_Func          get_metrics;
@@ -791,7 +796,6 @@ FT_BEGIN_HEADER
     TT_Get_Name_ID_Func          get_name_id;
 
   } SFNT_Interface;
-
 
   /* transitional */
   typedef SFNT_Interface*   SFNT_Service;
@@ -833,8 +837,9 @@ FT_BEGIN_HEADER
           free_colr_,                    \
           set_palette_,                  \
           get_colr_layer_,               \
-          get_colr_layer_gradients_,    \
+          get_colr_layer_gradients_,     \
           get_colorline_stops_,          \
+          get_paint_,                    \
           colr_blend_,                   \
           get_metrics_,                  \
           get_name_,                     \
@@ -877,6 +882,7 @@ FT_BEGIN_HEADER
     get_colr_layer_,                     \
     get_colr_layer_gradients_,           \
     get_colorline_stops_,                \
+    get_paint_,                          \
     colr_blend_,                         \
     get_metrics_,                        \
     get_name_,                           \
