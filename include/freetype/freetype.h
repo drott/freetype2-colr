@@ -4192,7 +4192,11 @@ FT_BEGIN_HEADER
     COLR_PAINTFORMAT_SOLID           = 1,
     COLR_PAINTFORMAT_LINEAR_GRADIENT = 2,
     COLR_PAINTFORMAT_RADIAL_GRADIENT = 3,
-    COLR_PAINT_FORMAT_MAX            = 4,
+    COLR_PAINTFORMAT_GLYPH           = 4,
+    COLR_PAINTFORMAT_COLR_GLYPH      = 5,
+    COLR_PAINTFORMAT_TRANSFORMED     = 6,
+    COLR_PAINTFORMAT_COMPOSITE       = 7,
+    COLR_PAINT_FORMAT_MAX            = 8,
     COLR_PAINTFORMAT_UNSUPPORTED     = 255
   } FT_PaintFormat;
 
@@ -4409,8 +4413,92 @@ FT_BEGIN_HEADER
     FT_UShort      r0;
     FT_Vector      c1;
     FT_UShort      r1;
-    FT_Matrix      affine;
   } FT_PaintRadialGradient;
+
+  typedef struct FT_PaintGlyph_
+  {
+    FT_UInt glyphID;
+  } FT_PaintGlyph;
+
+  typedef struct FT_PaintColrGlyph_
+  {
+    FT_UInt glyphID;
+  } FT_PaintColrGlyph;
+
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_OpaquePaint
+   *
+   * @description:
+   *   Struct representing an offset to a Paint stored in the COLR table, see
+   *   Offset<24>,
+   * https://github.com/googlefonts/colr-gradients-spec/blob/master/colr-gradients-spec.md#off-43-data-types
+   *
+   *
+   * @fields:
+   *   p ::
+   *     An internal offset to a Paint table, needs to be set to NULL before
+   *     passing this struct as an argument to FT_Get_Paint.
+   */
+  typedef struct FT_Opaque_Paint_
+  {
+    FT_Byte* p;
+  } FT_OpaquePaint;
+
+
+  typedef struct FT_Affine_23_
+  {
+    FT_Fixed  xx, xy;
+    FT_Fixed  yx, yy;
+    FT_Fixed  dx, dy;
+
+  } FT_Affine23;
+
+  typedef struct FT_PaintTransformed_
+  {
+    FT_OpaquePaint paint;
+    FT_Affine23 affine;
+  } FT_PaintTransformed;
+
+  typedef enum
+  {
+    COLR_COMPOSITE_CLEAR          = 0,
+    COLR_COMPOSITE_SRC            = 1,
+    COLR_COMPOSITE_DEST           = 2,
+    COLR_COMPOSITE_SRC_OVER       = 3,
+    COLR_COMPOSITE_DEST_OVER      = 4,
+    COLR_COMPOSITE_SRC_IN         = 5,
+    COLR_COMPOSITE_DEST_IN        = 6,
+    COLR_COMPOSITE_SRC_OUT        = 7,
+    COLR_COMPOSITE_DEST_OUT       = 8,
+    COLR_COMPOSITE_SRC_ATOP       = 9,
+    COLR_COMPOSITE_DEST_ATOP      = 10,
+    COLR_COMPOSITE_XOR            = 11,
+    COLR_COMPOSITE_SCREEN         = 12,
+    COLR_COMPOSITE_OVERLAY        = 13,
+    COLR_COMPOSITE_DARKEN         = 14,
+    COLR_COMPOSITE_LIGHTEN        = 15,
+    COLR_COMPOSITE_COLOR_DODGE    = 16,
+    COLR_COMPOSITE_COLOR_BURN     = 17,
+    COLR_COMPOSITE_HARD_LIGHT     = 18,
+    COLR_COMPOSITE_SOFT_LIGHT     = 19,
+    COLR_COMPOSITE_DIFFERENCE     = 20,
+    COLR_COMPOSITE_EXCLUSION      = 21,
+    COLR_COMPOSITE_MULTIPLY       = 22,
+    COLR_COMPOSITE_HSL_HUE        = 23,
+    COLR_COMPOSITE_HSL_SATURATION = 24,
+    COLR_COMPOSITE_HSL_COLOR      = 25,
+    COLR_COMPOSITE_HSL_LUMINOSITY = 26
+  } FT_Composite_Mode;
+
+  typedef struct FT_PaintComposite_
+  {
+    FT_OpaquePaint   source_paint;
+    FT_Composite_Mode composite_mode;
+    FT_OpaquePaint   backdrop_paint;
+  } FT_PaintComposite;
+
 
   /**************************************************************************
    *
@@ -4433,16 +4521,21 @@ FT_BEGIN_HEADER
    *     @FT_PaintRadialGradient depending on format, see @FT_PaintFormat.
    *     The suitable union member will be populated by
    *     @FT_Get_Color_Glyph_Layer_Gradients, for example the
-   *     @FT_PaintLinearGradient member will be set if the format is a linear
-   *     gradient.
+   *     @FT_PaintLinearGradient member will be set if the format is a
+   * linear gradient.
    */
   typedef struct FT_COLR_Paint_
   {
     FT_PaintFormat format;
-    union {
+    union
+    {
       FT_PaintSolid          solid;
       FT_PaintLinearGradient linear_gradient;
       FT_PaintRadialGradient radial_gradient;
+      FT_PaintGlyph          glyph;
+      FT_PaintColrGlyph      colr_glyph;
+      FT_PaintTransformed    transformed;
+      FT_PaintComposite      composite;
     } u;
   } FT_COLR_Paint;
 
@@ -4483,15 +4576,15 @@ FT_BEGIN_HEADER
    *
    * @return:
    *   Value~1 if everything is OK.  If there are no more layers (or if there
-   *   are no COLR v1 layers at all), value~0 gets returned.  In case of an error,
-   *   value~0 is returned also.
+   *   are no COLR v1 layers at all), value~0 gets returned.  In case of an
+   * error, value~0 is returned also.
    */
-  FT_EXPORT ( FT_Bool )
-  FT_Get_Color_Glyph_Layer_Gradients ( FT_Face           face,
-                                       FT_UInt           base_glyph,
-                                       FT_UInt           *aglyph_index,
-                                       FT_COLR_Paint *   paint,
-                                       FT_LayerIterator *iterator );
+  FT_EXPORT( FT_Bool )
+  FT_Get_Color_Glyph_Layer_Gradients( FT_Face           face,
+                                      FT_UInt           base_glyph,
+                                      FT_UInt*          aglyph_index,
+                                      FT_OpaquePaint*   paint,
+                                      FT_LayerIterator* iterator );
 
   /**************************************************************************
    *
@@ -4523,11 +4616,20 @@ FT_BEGIN_HEADER
    *   Value~1 if everything is OK.  If there are no more color stops, value~0
    *   gets returned. In case of an error, value~0 is returned also.
    */
-  FT_EXPORT ( FT_Bool )
-  FT_Get_Colorline_Stops ( FT_Face               face,
-                           FT_ColorStop *       color_stop,
-                           FT_ColorStopIterator *iterator );
+  FT_EXPORT( FT_Bool )
+  FT_Get_Colorline_Stops( FT_Face               face,
+                          FT_ColorStop*         color_stop,
+                          FT_ColorStopIterator* iterator );
 
+  /**************************************************************************
+   * @function
+   *  FT_Get_Paint
+   *
+   * @description: Accesses a paint using an opaque paint which internally
+   * stores the offset to the respective Paint object in the COLR table.
+   */
+  FT_EXPORT( FT_Bool )
+  FT_Get_Paint( FT_Face face, FT_OpaquePaint opaque_paint, FT_COLR_Paint* paint );
 
   /**************************************************************************
    *
