@@ -387,7 +387,7 @@ FT_BEGIN_HEADER
    *   yy ::
    *     Matrix coefficient.
    */
-  typedef struct  FT_Matrix_
+  typedef struct FT_Matrix_
   {
     FT_Fixed  xx, xy;
     FT_Fixed  yx, yy;
