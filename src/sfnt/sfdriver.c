@@ -1213,110 +1213,113 @@
 #define PUT_COLOR_LAYERS( a )  NULL
 #endif
 
+/* TODO: Define configuration flag? */
+#define PUT_COLOR_LAYERS_V1( a ) a
+
 #ifdef TT_CONFIG_OPTION_POSTSCRIPT_NAMES
 #define PUT_PS_NAMES( a )  a
 #else
 #define PUT_PS_NAMES( a )  NULL
 #endif
 
-  FT_DEFINE_SFNT_INTERFACE(
-    sfnt_interface,
+      FT_DEFINE_SFNT_INTERFACE(
+          sfnt_interface,
 
-    tt_face_goto_table,     /* TT_Loader_GotoTableFunc goto_table      */
+          tt_face_goto_table, /* TT_Loader_GotoTableFunc goto_table      */
 
-    sfnt_init_face,         /* TT_Init_Face_Func       init_face       */
-    sfnt_load_face,         /* TT_Load_Face_Func       load_face       */
-    sfnt_done_face,         /* TT_Done_Face_Func       done_face       */
-    sfnt_get_interface,     /* FT_Module_Requester     get_interface   */
+          sfnt_init_face,     /* TT_Init_Face_Func       init_face       */
+          sfnt_load_face,     /* TT_Load_Face_Func       load_face       */
+          sfnt_done_face,     /* TT_Done_Face_Func       done_face       */
+          sfnt_get_interface, /* FT_Module_Requester     get_interface   */
 
-    tt_face_load_any,       /* TT_Load_Any_Func        load_any        */
+          tt_face_load_any, /* TT_Load_Any_Func        load_any        */
 
-    tt_face_load_head,      /* TT_Load_Table_Func      load_head       */
-    tt_face_load_hhea,      /* TT_Load_Metrics_Func    load_hhea       */
-    tt_face_load_cmap,      /* TT_Load_Table_Func      load_cmap       */
-    tt_face_load_maxp,      /* TT_Load_Table_Func      load_maxp       */
-    tt_face_load_os2,       /* TT_Load_Table_Func      load_os2        */
-    tt_face_load_post,      /* TT_Load_Table_Func      load_post       */
+          tt_face_load_head, /* TT_Load_Table_Func      load_head       */
+          tt_face_load_hhea, /* TT_Load_Metrics_Func    load_hhea       */
+          tt_face_load_cmap, /* TT_Load_Table_Func      load_cmap       */
+          tt_face_load_maxp, /* TT_Load_Table_Func      load_maxp       */
+          tt_face_load_os2,  /* TT_Load_Table_Func      load_os2        */
+          tt_face_load_post, /* TT_Load_Table_Func      load_post       */
 
-    tt_face_load_name,      /* TT_Load_Table_Func      load_name       */
-    tt_face_free_name,      /* TT_Free_Table_Func      free_name       */
+          tt_face_load_name, /* TT_Load_Table_Func      load_name       */
+          tt_face_free_name, /* TT_Free_Table_Func      free_name       */
 
-    tt_face_load_kern,      /* TT_Load_Table_Func      load_kern       */
-    tt_face_load_gasp,      /* TT_Load_Table_Func      load_gasp       */
-    tt_face_load_pclt,      /* TT_Load_Table_Func      load_init       */
+          tt_face_load_kern, /* TT_Load_Table_Func      load_kern       */
+          tt_face_load_gasp, /* TT_Load_Table_Func      load_gasp       */
+          tt_face_load_pclt, /* TT_Load_Table_Func      load_init       */
 
-    /* see `ttload.h' */
-    PUT_EMBEDDED_BITMAPS( tt_face_load_bhed ),
-                            /* TT_Load_Table_Func      load_bhed       */
-    PUT_EMBEDDED_BITMAPS( tt_face_load_sbit_image ),
-                            /* TT_Load_SBit_Image_Func load_sbit_image */
+          /* see `ttload.h' */
+          PUT_EMBEDDED_BITMAPS( tt_face_load_bhed ),
+          /* TT_Load_Table_Func      load_bhed       */
+          PUT_EMBEDDED_BITMAPS( tt_face_load_sbit_image ),
+          /* TT_Load_SBit_Image_Func load_sbit_image */
 
-    /* see `ttpost.h' */
-    PUT_PS_NAMES( tt_face_get_ps_name   ),
-                            /* TT_Get_PS_Name_Func     get_psname      */
-    PUT_PS_NAMES( tt_face_free_ps_names ),
-                            /* TT_Free_Table_Func      free_psnames    */
+          /* see `ttpost.h' */
+          PUT_PS_NAMES( tt_face_get_ps_name ),
+          /* TT_Get_PS_Name_Func     get_psname      */
+          PUT_PS_NAMES( tt_face_free_ps_names ),
+          /* TT_Free_Table_Func      free_psnames    */
 
-    /* since version 2.1.8 */
-    tt_face_get_kerning,    /* TT_Face_GetKerningFunc  get_kerning     */
+          /* since version 2.1.8 */
+          tt_face_get_kerning, /* TT_Face_GetKerningFunc  get_kerning     */
 
-    /* since version 2.2 */
-    tt_face_load_font_dir,  /* TT_Load_Table_Func      load_font_dir   */
-    tt_face_load_hmtx,      /* TT_Load_Metrics_Func    load_hmtx       */
+          /* since version 2.2 */
+          tt_face_load_font_dir, /* TT_Load_Table_Func      load_font_dir   */
+          tt_face_load_hmtx,     /* TT_Load_Metrics_Func    load_hmtx       */
 
-    /* see `ttsbit.h' and `sfnt.h' */
-    PUT_EMBEDDED_BITMAPS( tt_face_load_sbit ),
-                            /* TT_Load_Table_Func      load_eblc       */
-    PUT_EMBEDDED_BITMAPS( tt_face_free_sbit ),
-                            /* TT_Free_Table_Func      free_eblc       */
+          /* see `ttsbit.h' and `sfnt.h' */
+          PUT_EMBEDDED_BITMAPS( tt_face_load_sbit ),
+          /* TT_Load_Table_Func      load_eblc       */
+          PUT_EMBEDDED_BITMAPS( tt_face_free_sbit ),
+          /* TT_Free_Table_Func      free_eblc       */
 
-    PUT_EMBEDDED_BITMAPS( tt_face_set_sbit_strike     ),
-                   /* TT_Set_SBit_Strike_Func      set_sbit_strike     */
-    PUT_EMBEDDED_BITMAPS( tt_face_load_strike_metrics ),
-                   /* TT_Load_Strike_Metrics_Func  load_strike_metrics */
+          PUT_EMBEDDED_BITMAPS( tt_face_set_sbit_strike ),
+          /* TT_Set_SBit_Strike_Func      set_sbit_strike     */
+          PUT_EMBEDDED_BITMAPS( tt_face_load_strike_metrics ),
+          /* TT_Load_Strike_Metrics_Func  load_strike_metrics */
 
-    PUT_COLOR_LAYERS( tt_face_load_cpal ),
-                            /* TT_Load_Table_Func      load_cpal       */
-    PUT_COLOR_LAYERS( tt_face_load_colr ),
-                            /* TT_Load_Table_Func      load_colr       */
-    PUT_COLOR_LAYERS( tt_face_free_cpal ),
-                            /* TT_Free_Table_Func      free_cpal       */
-    PUT_COLOR_LAYERS( tt_face_free_colr ),
-                            /* TT_Free_Table_Func      free_colr       */
-    PUT_COLOR_LAYERS( tt_face_palette_set ),
-                            /* TT_Set_Palette_Func     set_palette     */
-    PUT_COLOR_LAYERS( tt_face_get_colr_layer ),
-                            /* TT_Get_Colr_Layer_Func  get_colr_layer  */
-    PUT_COLOR_LAYERS( tt_face_get_colr_layer_gradients ),
-                            /* TT_Get_Colr_Layer_Gradients_Func  get_colr_layer_gradients  */
-    PUT_COLOR_LAYERS( tt_face_get_colorline_stops ),
-                            /* TT_Get_Colorline_Stops_Func  get_colorline_stops  */
-    PUT_COLOR_LAYERS( tt_face_colr_blend_layer ),
-                            /* TT_Blend_Colr_Func      colr_blend      */
+          PUT_COLOR_LAYERS( tt_face_load_cpal ),
+          /* TT_Load_Table_Func      load_cpal       */
+          PUT_COLOR_LAYERS( tt_face_load_colr ),
+          /* TT_Load_Table_Func      load_colr       */
+          PUT_COLOR_LAYERS( tt_face_free_cpal ),
+          /* TT_Free_Table_Func      free_cpal       */
+          PUT_COLOR_LAYERS( tt_face_free_colr ),
+          /* TT_Free_Table_Func      free_colr       */
+          PUT_COLOR_LAYERS( tt_face_palette_set ),
+          /* TT_Set_Palette_Func     set_palette     */
+          PUT_COLOR_LAYERS( tt_face_get_colr_layer ),
+          /* TT_Get_Colr_Layer_Func  get_colr_layer  */
+          PUT_COLOR_LAYERS_V1( tt_face_get_colr_layer_gradients ),
+          /* TT_Get_Colr_Layer_Gradients_Func  get_colr_layer_gradients  */
+          PUT_COLOR_LAYERS_V1( tt_face_get_colorline_stops ),
+          /* TT_Get_Paint  get_paint  */
+          PUT_COLOR_LAYERS_V1( tt_face_get_paint ),
+          /* TT_Get_Colorline_Stops_Func  get_colorline_stops  */
+          PUT_COLOR_LAYERS( tt_face_colr_blend_layer ),
+          /* TT_Blend_Colr_Func      colr_blend      */
 
-    tt_face_get_metrics,    /* TT_Get_Metrics_Func     get_metrics     */
+          tt_face_get_metrics, /* TT_Get_Metrics_Func     get_metrics     */
 
-    tt_face_get_name,       /* TT_Get_Name_Func        get_name        */
-    sfnt_get_name_id        /* TT_Get_Name_ID_Func     get_name_id     */
-  )
+          tt_face_get_name, /* TT_Get_Name_Func        get_name        */
+          sfnt_get_name_id  /* TT_Get_Name_ID_Func     get_name_id     */
+          )
 
+          FT_DEFINE_MODULE(
+              sfnt_module_class,
 
-  FT_DEFINE_MODULE(
-    sfnt_module_class,
+              0, /* not a font driver or renderer */
+              sizeof( FT_ModuleRec ),
 
-    0,  /* not a font driver or renderer */
-    sizeof ( FT_ModuleRec ),
+              "sfnt",   /* driver name                            */
+              0x10000L, /* driver version 1.0                     */
+              0x20000L, /* driver requires FreeType 2.0 or higher */
 
-    "sfnt",     /* driver name                            */
-    0x10000L,   /* driver version 1.0                     */
-    0x20000L,   /* driver requires FreeType 2.0 or higher */
+              (const void*)&sfnt_interface, /* module specific interface */
 
-    (const void*)&sfnt_interface,  /* module specific interface */
+              (FT_Module_Constructor)NULL,            /* module_init   */
+              (FT_Module_Destructor)NULL,             /* module_done   */
+              (FT_Module_Requester)sfnt_get_interface /* get_interface */
+              )
 
-    (FT_Module_Constructor)NULL,               /* module_init   */
-    (FT_Module_Destructor) NULL,               /* module_done   */
-    (FT_Module_Requester)  sfnt_get_interface  /* get_interface */
-  )
-
-
-/* END */
+      /* END */

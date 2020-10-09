@@ -4565,9 +4565,6 @@ FT_BEGIN_HEADER
    *     same object again.
    *
    * @output:
-   *   aglyph_index ::
-   *     The glyph index of the current layer.
-   *
    *   paint ::
    *     The @FT_COLR_Paint union specifying a paint format and further
    *     gradient information in the union members.
@@ -4582,7 +4579,6 @@ FT_BEGIN_HEADER
   FT_EXPORT( FT_Bool )
   FT_Get_Color_Glyph_Layer_Gradients( FT_Face           face,
                                       FT_UInt           base_glyph,
-                                      FT_UInt*          aglyph_index,
                                       FT_OpaquePaint*   paint,
                                       FT_LayerIterator* iterator );
 

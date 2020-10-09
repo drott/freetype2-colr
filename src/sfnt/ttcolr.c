@@ -418,20 +418,6 @@
 
       apaint->u.radial_gradient.r1 = FT_NEXT_USHORT ( p );
       FT_NEXT_ULONG ( p );
-
-      affine_offset = FT_NEXT_ULONG ( p );
-
-      apaint->u.radial_gradient.affine.xx = 1;
-      apaint->u.radial_gradient.affine.xy = 0;
-      apaint->u.radial_gradient.affine.yx = 0;
-      apaint->u.radial_gradient.affine.yy = 1;
-
-      if ( !affine_offset )
-        return 1;
-
-      if ( !read_affine( colr, paint_base, affine_offset,
-                         &apaint->u.radial_gradient.affine ) )
-        return 0;
     }
 
     return 1;
@@ -472,11 +458,10 @@
   }
 
   FT_LOCAL_DEF ( FT_Bool )
-  tt_face_get_colr_layer_gradients ( TT_Face           face,
-                                     FT_UInt           base_glyph,
-                                     FT_UInt *         aglyph_index,
-                                     FT_COLR_Paint *   paint,
-                                     FT_LayerIterator *iterator )
+  tt_face_get_colr_layer_gradients( TT_Face           face,
+                                    FT_UInt           base_glyph,
+                                    FT_OpaquePaint*   paint,
+                                    FT_LayerIterator* iterator )
   {
     Colr* colr = (Colr*)face->colr;
     BaseGlyphV1Record base_glyph_v1_record;
@@ -501,8 +486,8 @@
            base_glyph_v1_record.layer_array_offset > colr->table_size )
         return 0;
 
-      p                    = (FT_Byte *)( colr->base_glyphs_v1 +
-                       base_glyph_v1_record.layer_array_offset );
+      p                    = (FT_Byte*)( colr->base_glyphs_v1 +
+                      base_glyph_v1_record.layer_array_offset );
       iterator->num_layers = FT_NEXT_ULONG ( p );
 
       if ( p > (FT_Byte *)( colr->table + colr->table_size ) )
@@ -527,10 +512,10 @@
     if ( gid > ( FT_UInt ) ( FT_FACE ( face )->num_glyphs ) )
       return 0;
 
-    if ( !read_paint ( colr, layer_v1_array, FT_NEXT_ULONG ( p ), paint ) )
-      return 0;
+    // TODO: Just return FT_OpaquePaint here.
+    /* if ( !read_paint ( colr, layer_v1_array, FT_NEXT_ULONG ( p ), paint ) ) */
+    /*   return 0; */
 
-    *aglyph_index = gid;
     iterator->p = p;
 
     iterator->layer++;
@@ -568,6 +553,14 @@
     iterator->current_color_stop++;
 
     return 1;
+  }
+
+  FT_LOCAL_DEF( FT_Bool )
+  tt_face_get_paint( TT_Face        face,
+                     FT_OpaquePaint opaque_paint,
+                     FT_COLR_Paint*      paint )
+  {
+    return 0;
   }
 
   FT_LOCAL_DEF( FT_Error )

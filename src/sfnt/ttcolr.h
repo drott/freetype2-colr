@@ -43,25 +43,28 @@ FT_BEGIN_HEADER
                           FT_LayerIterator*  iterator );
 
   FT_LOCAL( FT_Bool )
-  tt_face_get_colr_layer_gradients ( TT_Face           face,
-                                     FT_UInt           base_glyph,
-                                     FT_UInt *         aglyph_index,
-                                     FT_COLR_Paint *   paint,
-                                     FT_LayerIterator *iterator );
+  tt_face_get_colr_layer_gradients( TT_Face           face,
+                                    FT_UInt           base_glyph,
+                                    FT_OpaquePaint*   paint,
+                                    FT_LayerIterator* iterator );
 
   FT_LOCAL( FT_Bool )
-  tt_face_get_colorline_stops ( TT_Face               face,
-                                FT_ColorStop *        color_stop,
-                                FT_ColorStopIterator *iterator );
+  tt_face_get_colorline_stops( TT_Face               face,
+                               FT_ColorStop*         color_stop,
+                               FT_ColorStopIterator* iterator );
+
+  FT_LOCAL( FT_Bool )
+  tt_face_get_paint( TT_Face        face,
+                     FT_OpaquePaint opaque_paint,
+                     FT_COLR_Paint*      paint );
 
   FT_LOCAL( FT_Error )
-  tt_face_colr_blend_layer( TT_Face       face,
-                            FT_UInt       color_index,
-                            FT_GlyphSlot  dstSlot,
-                            FT_GlyphSlot  srcSlot );
+  tt_face_colr_blend_layer( TT_Face      face,
+                            FT_UInt      color_index,
+                            FT_GlyphSlot dstSlot,
+                            FT_GlyphSlot srcSlot );
 
-
-FT_END_HEADER
+  FT_END_HEADER
 
 
 #endif /* __TTCOLR_H__ */
