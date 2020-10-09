@@ -31,6 +31,7 @@
 #include <freetype/internal/ftstream.h>
 #include <freetype/tttags.h>
 #include <freetype/ftcolor.h>
+#include "integer-types.h"
 
 
 #ifdef TT_CONFIG_OPTION_COLOR_LAYERS
@@ -39,12 +40,12 @@
 
 
   /* NOTE: These are the table sizes calculated through the specs. */
-#define BASE_GLYPH_SIZE            6
-#define BASE_GLYPH_V1_SIZE         6
-#define LAYER_V1_RECORD_SIZE       6
-#define COLOR_STOP_SIZE            6
-#define LAYER_SIZE                 4
-#define COLR_HEADER_SIZE          14
+#define BASE_GLYPH_SIZE                  6
+#define BASE_GLYPH_V1_RECORD_SIZE        6
+#define LAYER_V1_LIST_PAINT_OFFSET_SIZE  4
+#define COLOR_STOP_SIZE                  6
+#define LAYER_SIZE                       4
+#define COLR_HEADER_SIZE                14
 
 
   typedef struct BaseGlyphRecord_
@@ -58,8 +59,8 @@
   typedef struct BaseGlyphV1Record_
   {
     FT_UShort gid;
-    /* offet to parent BaseGlyphV1Array */
-    FT_ULong layer_array_offset;
+    /* Offset from start of BaseGlyphV1List, i.e. from base_glyphs_v1. */
+    FT_ULong layer_list_offset;
   } BaseGlyphV1Record;
 
   typedef struct Colr_
@@ -71,7 +72,8 @@
     FT_Byte*  base_glyphs;
     FT_Byte*  layers;
 
-    FT_UShort num_base_glyphs_v1;
+    FT_ULong  num_base_glyphs_v1;
+    /* Points at beginning of BaseGlyphV1List. */
     FT_Byte*  base_glyphs_v1;
 
     /* The memory which backs up the `COLR' table. */
@@ -436,9 +438,9 @@
     while ( min <= max )
     {
       FT_Int    mid = min + ( max - min ) / 2;
-      /* base_glyph_begin is the beginning of the BaseGlyphV1Array, skip the
-       * array length by adding 4 to start binary search in layers. */
-      FT_Byte * p   = base_glyph_begin + 4 + mid * BASE_GLYPH_V1_SIZE;
+      /* base_glyph_begin is the beginning of the BaseGlyphV1List, skip the
+       * numBaseGlyphV1Records by adding 4 to start binary search in the array of BaseGlyphV1Record. */
+      FT_Byte * p   = base_glyph_begin + 4 + mid * BASE_GLYPH_V1_RECORD_SIZE;
 
       FT_UShort  gid = FT_NEXT_USHORT( p );
 
@@ -449,7 +451,7 @@
       else
       {
         record->gid                = gid;
-        record->layer_array_offset = FT_NEXT_ULONG ( p );
+        record->layer_list_offset = FT_NEXT_ULONG ( p );
         return 1;
       }
     }
@@ -460,16 +462,19 @@
   FT_LOCAL_DEF ( FT_Bool )
   tt_face_get_colr_layer_gradients( TT_Face           face,
                                     FT_UInt           base_glyph,
-                                    FT_OpaquePaint*   paint,
+                                    FT_OpaquePaint*   opaque_paint,
                                     FT_LayerIterator* iterator )
   {
     Colr* colr = (Colr*)face->colr;
     BaseGlyphV1Record base_glyph_v1_record;
-    FT_Byte *         p, *layer_v1_array;
-    FT_UInt gid;
+    FT_Byte *         p, *p_layer_v1_list;
+    FT_UInt32         paint_offset;
 
     if ( colr->version < 1 || !colr->num_base_glyphs_v1 ||
          !colr->base_glyphs_v1 )
+      return 0;
+
+    if ( opaque_paint->p )
       return 0;
 
     if ( !iterator->p )
@@ -482,16 +487,16 @@
         return 0;
 
       /* Try to find layer size to configure iterator */
-      if ( !base_glyph_v1_record.layer_array_offset ||
-           base_glyph_v1_record.layer_array_offset > colr->table_size )
+      if ( !base_glyph_v1_record.layer_list_offset ||
+           base_glyph_v1_record.layer_list_offset > colr->table_size )
         return 0;
 
       p                    = (FT_Byte*)( colr->base_glyphs_v1 +
-                      base_glyph_v1_record.layer_array_offset );
-      iterator->num_layers = FT_NEXT_ULONG ( p );
-
-      if ( p > (FT_Byte *)( colr->table + colr->table_size ) )
+                      base_glyph_v1_record.layer_list_offset );
+      if ( p >= (FT_Byte*)( colr->table + colr->table_size ) )
         return 0;
+
+      iterator->num_layers = FT_NEXT_BYTE ( p );
 
       iterator->p = p;
     }
@@ -499,22 +504,16 @@
     if ( iterator->layer >= iterator->num_layers )
       return 0;
 
-    /* We have an iterator pointing at a LayerV1Record */
+    /* We have an iterator pointing at a paint offset as part of the paintOffset array in LayerV1List */
     p = iterator->p;
 
-
-    /* reverse to layer_v1_array, TODO */
-    /* TODO: More checks on this one. */
-    layer_v1_array = p - iterator->layer * LAYER_V1_RECORD_SIZE - 4 /* array size */;
-
-    gid = FT_NEXT_USHORT(p);
-
-    if ( gid > ( FT_UInt ) ( FT_FACE ( face )->num_glyphs ) )
+    p_layer_v1_list = p - iterator->layer * LAYER_V1_LIST_PAINT_OFFSET_SIZE - 1 /* numLayers */;
+    if ( p_layer_v1_list < (FT_Byte*)( colr->base_glyphs_v1 ) ||
+         p_layer_v1_list > (FT_Byte*)( colr->table + colr->table_size ) )
       return 0;
 
-    // TODO: Just return FT_OpaquePaint here.
-    /* if ( !read_paint ( colr, layer_v1_array, FT_NEXT_ULONG ( p ), paint ) ) */
-    /*   return 0; */
+    paint_offset = FT_NEXT_ULONG( p );
+    opaque_paint->p = (FT_Byte*)(p_layer_v1_list + paint_offset);
 
     iterator->p = p;
 
@@ -560,6 +559,9 @@
                      FT_OpaquePaint opaque_paint,
                      FT_COLR_Paint*      paint )
   {
+    /* if ( !read_paint ( colr, layer_v1_array, FT_NEXT_ULONG ( p ), paint ) ) */
+    /*   return 0; */
+
     return 0;
   }
 
