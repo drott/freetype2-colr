@@ -307,7 +307,7 @@
     FT_PaintExtend paint_extend;
     /* TODO: Check pointer limits. */
 
-    paint_extend = FT_NEXT_USHORT ( p );
+    paint_extend = FT_NEXT_BYTE( p );
     if ( paint_extend > COLR_PAINT_EXTEND_REFLECT )
       return 0;
 
@@ -351,7 +351,7 @@
 
     paint_base = p;
 
-    apaint->format = FT_NEXT_USHORT ( p );
+    apaint->format = FT_NEXT_BYTE( p );
 
     if ( apaint->format >= COLR_PAINT_FORMAT_MAX )
       return 0;
@@ -380,7 +380,7 @@
     else if ( apaint->format == COLR_PAINTFORMAT_LINEAR_GRADIENT )
     {
       FT_ULong color_line_offset = 0;
-      color_line_offset = FT_NEXT_ULONG ( p );
+      color_line_offset          = FT_NEXT_OFF3( p );
       if ( !read_color_line ( colr,
                               paint_base,
                               color_line_offset,
@@ -404,7 +404,7 @@
       FT_ULong color_line_offset = 0;
       FT_ULong affine_offset = 0;
 
-      color_line_offset = FT_NEXT_ULONG ( p );
+      color_line_offset = FT_NEXT_OFF3( p );
       if ( !read_color_line ( colr,
                               paint_base,
                               color_line_offset,
@@ -490,7 +490,7 @@
     }
     else if ( apaint->format == COLR_PAINTFORMAT_COLR_GLYPH )
     {
-      apaint->u.colr_glyph.glyphID = FT_NEXT_ULONG( p );
+      apaint->u.colr_glyph.glyphID = FT_NEXT_USHORT( p );
     }
 
     return 1;
