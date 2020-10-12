@@ -4415,16 +4415,6 @@ FT_BEGIN_HEADER
     FT_UShort      r1;
   } FT_PaintRadialGradient;
 
-  typedef struct FT_PaintGlyph_
-  {
-    FT_UInt glyphID;
-  } FT_PaintGlyph;
-
-  typedef struct FT_PaintColrGlyph_
-  {
-    FT_UInt glyphID;
-  } FT_PaintColrGlyph;
-
   /**************************************************************************
    *
    * @struct:
@@ -4446,6 +4436,16 @@ FT_BEGIN_HEADER
     FT_Byte* p;
   } FT_OpaquePaint;
 
+  typedef struct FT_PaintGlyph_
+  {
+    FT_OpaquePaint paint;
+    FT_UInt glyphID;
+  } FT_PaintGlyph;
+
+  typedef struct FT_PaintColrGlyph_
+  {
+    FT_UInt glyphID;
+  } FT_PaintColrGlyph;
 
   typedef struct FT_Affine_23_
   {
@@ -4489,7 +4489,8 @@ FT_BEGIN_HEADER
     COLR_COMPOSITE_HSL_HUE        = 23,
     COLR_COMPOSITE_HSL_SATURATION = 24,
     COLR_COMPOSITE_HSL_COLOR      = 25,
-    COLR_COMPOSITE_HSL_LUMINOSITY = 26
+    COLR_COMPOSITE_HSL_LUMINOSITY = 26,
+    COLR_COMPOSITE_MAX            = 27
   } FT_Composite_Mode;
 
   typedef struct FT_PaintComposite_
@@ -4529,13 +4530,13 @@ FT_BEGIN_HEADER
     FT_PaintFormat format;
     union
     {
+      FT_PaintGlyph          glyph;
       FT_PaintSolid          solid;
       FT_PaintLinearGradient linear_gradient;
       FT_PaintRadialGradient radial_gradient;
-      FT_PaintGlyph          glyph;
-      FT_PaintColrGlyph      colr_glyph;
       FT_PaintTransformed    transformed;
       FT_PaintComposite      composite;
+      FT_PaintColrGlyph      colr_glyph;
     } u;
   } FT_COLR_Paint;
 
