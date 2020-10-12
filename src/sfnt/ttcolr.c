@@ -159,7 +159,7 @@
       p = (FT_Byte*)( table + base_glyphs_v1_offset );
       num_base_glyphs_v1 = FT_PEEK_ULONG( p );
 
-      if ( num_base_glyphs_v1 * BASE_GLYPH_V1_SIZE >
+      if ( num_base_glyphs_v1 * BASE_GLYPH_V1_RECORD_SIZE >
            table_size - base_glyphs_v1_offset )
       {
         goto InvalidTable;
@@ -345,14 +345,10 @@
   }
 
   static FT_Bool
-  read_paint ( Colr *         colr,
-               FT_Byte *      layer_v1_array,
-               FT_ULong       paint_offset,
-               FT_COLR_Paint *apaint )
+  read_paint( Colr* colr, FT_Byte* p, FT_COLR_Paint* apaint )
   {
-    FT_Byte *p, *paint_base;
+    FT_Byte *paint_base;
 
-    p          = layer_v1_array + paint_offset;
     paint_base = p;
 
     apaint->format = FT_NEXT_USHORT ( p );
@@ -360,7 +356,21 @@
     if ( apaint->format >= COLR_PAINT_FORMAT_MAX )
       return 0;
 
-    if ( apaint->format == COLR_PAINTFORMAT_SOLID )
+    if (apaint->format == COLR_PAINTFORMAT_GLYPH) {
+
+      FT_UInt32 paint_offset = 0;
+      FT_Byte* paint_p;
+      paint_offset           = FT_NEXT_UOFF3( p );
+      if ( !paint_offset )
+        return 0;
+      paint_p = (FT_Byte*)(paint_base + paint_offset);
+      if ( paint_p > (FT_Byte*)( colr->table + colr->table_size ) )
+        return 0;
+
+      apaint->u.glyph.paint.p = paint_p;
+      apaint->u.glyph.glyphID = FT_NEXT_USHORT( p );
+    }
+    else if ( apaint->format == COLR_PAINTFORMAT_SOLID )
     {
       apaint->u.solid.color.palette_index = FT_NEXT_USHORT ( p );
       apaint->u.solid.color.alpha = FT_NEXT_USHORT ( p );
@@ -420,6 +430,67 @@
 
       apaint->u.radial_gradient.r1 = FT_NEXT_USHORT ( p );
       FT_NEXT_ULONG ( p );
+    }
+    else if ( apaint->format == COLR_PAINTFORMAT_TRANSFORMED )
+    {
+      FT_UInt32 paint_offset = 0;
+      FT_Byte* paint_p;
+      paint_offset           = FT_NEXT_UOFF3( p );
+      if ( !paint_offset )
+        return 0;
+      paint_p = (FT_Byte*)(paint_base + paint_offset);
+      if ( paint_p > (FT_Byte*)( colr->table + colr->table_size ) )
+        return 0;
+
+      apaint->u.transformed.paint.p = paint_p;
+
+      apaint->u.transformed.affine.xx = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.transformed.affine.xy = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.transformed.affine.yx = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.transformed.affine.yy = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.transformed.affine.dx = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.transformed.affine.dy = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+    }
+    else if ( apaint->format == COLR_PAINTFORMAT_COMPOSITE )
+    {
+      FT_UInt32 paint_offset = 0;
+      FT_Byte* paint_p;
+      FT_UInt composite_mode = 0;
+
+      paint_offset           = FT_NEXT_UOFF3( p );
+      if ( !paint_offset )
+        return 0;
+      paint_p = (FT_Byte*)(paint_base + paint_offset);
+      if ( paint_p > (FT_Byte*)( colr->table + colr->table_size ) )
+        return 0;
+
+      apaint->u.composite.source_paint.p = paint_p;
+
+      composite_mode = FT_NEXT_BYTE(p);
+
+      if (composite_mode >= COLR_COMPOSITE_MAX)
+        return 0;
+
+      apaint->u.composite.composite_mode = composite_mode;
+
+      paint_offset           = FT_NEXT_UOFF3( p );
+      if ( !paint_offset )
+        return 0;
+      paint_p = (FT_Byte*)( paint_base + paint_offset );
+      if ( paint_p > (FT_Byte*)( colr->table + colr->table_size ) )
+        return 0;
+
+      apaint->u.composite.backdrop_paint.p = paint_p;
+    }
+    else if ( apaint->format == COLR_PAINTFORMAT_COLR_GLYPH )
+    {
+      apaint->u.colr_glyph.glyphID = FT_NEXT_ULONG( p );
     }
 
     return 1;
@@ -559,10 +630,16 @@
                      FT_OpaquePaint opaque_paint,
                      FT_COLR_Paint*      paint )
   {
-    /* if ( !read_paint ( colr, layer_v1_array, FT_NEXT_ULONG ( p ), paint ) ) */
-    /*   return 0; */
+    Colr* colr = (Colr*)face->colr;
+    FT_Byte *p;
 
-    return 0;
+    if ( opaque_paint.p < (FT_Byte*)colr->table ||
+         opaque_paint.p >= (FT_Byte*)( colr->table + colr->table_size ) )
+      return 0;
+
+    p = opaque_paint.p;
+
+    return read_paint ( colr, p, paint );
   }
 
   FT_LOCAL_DEF( FT_Error )
