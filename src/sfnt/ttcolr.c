@@ -31,7 +31,7 @@
 #include <freetype/internal/ftstream.h>
 #include <freetype/tttags.h>
 #include <freetype/ftcolor.h>
-#include "integer-types.h"
+#include <freetype/config/integer-types.h>
 
 
 #ifdef TT_CONFIG_OPTION_COLOR_LAYERS
@@ -40,12 +40,12 @@
 
 
   /* NOTE: These are the table sizes calculated through the specs. */
-#define BASE_GLYPH_SIZE                  6
-#define BASE_GLYPH_V1_RECORD_SIZE        6
-#define LAYER_V1_LIST_PAINT_OFFSET_SIZE  4
-#define COLOR_STOP_SIZE                  6
-#define LAYER_SIZE                       4
-#define COLR_HEADER_SIZE                14
+#define BASE_GLYPH_SIZE                  6U
+#define BASE_GLYPH_V1_RECORD_SIZE        6U
+#define LAYER_V1_LIST_PAINT_OFFSET_SIZE  4U
+#define COLOR_STOP_SIZE                  6U
+#define LAYER_SIZE                       4U
+#define COLR_HEADER_SIZE                14U
 
 
   typedef struct BaseGlyphRecord_
