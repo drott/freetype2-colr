@@ -373,6 +373,31 @@
     if ( apaint->format >= COLR_PAINT_FORMAT_MAX )
       return 0;
 
+    if (apaint->format == COLR_PAINTFORMAT_COLR_LAYERS ) {
+      // Initialize layer iterator
+      FT_Byte num_layers;
+      FT_UInt32 first_layer_index;
+
+      num_layers = FT_NEXT_BYTE( p );
+
+      if (num_layers > colr->num_layers_v1)
+        return 0;
+
+      first_layer_index = FT_NEXT_ULONG( p );
+
+      if ( first_layer_index + num_layers > colr->num_layers_v1 )
+        return 0;
+
+      apaint->u.colr_layers.layer_iterator.num_layers = num_layers;
+      apaint->u.colr_layers.layer_iterator.layer      = 0;
+      // TODO: Check if pointer is outside colr?
+      apaint->u.colr_layers.layer_iterator.p =
+          colr->layers_v1 +
+          ( LAYER_V1_LIST_PAINT_OFFSET_SIZE * first_layer_index );
+
+      return 1;
+    }
+
     if (apaint->format == COLR_PAINTFORMAT_GLYPH) {
 
       FT_UInt32 paint_offset = 0;
@@ -554,8 +579,7 @@
   {
     Colr* colr = (Colr*)face->colr;
     BaseGlyphV1Record base_glyph_v1_record;
-    FT_Byte *         p, *p_layer_v1_list;
-    FT_UInt32         paint_offset;
+    FT_Byte *         p;
 
     if ( colr->version < 1 || !colr->num_base_glyphs_v1 ||
          !colr->base_glyphs_v1 )
@@ -564,35 +588,32 @@
     if ( opaque_paint->p )
       return 0;
 
-#if 0
-    // TODO, just return a PaintColrLayers here, handle layer iteration in that paint retrieval
-    if ( !iterator->p )
-    {
-      iterator->layer = 0;
-      if ( !find_base_glyph_v1_record ( colr->base_glyphs_v1,
-                                        colr->num_base_glyphs_v1,
-                                        base_glyph,
-                                        &base_glyph_v1_record ) )
-        return 0;
-
-      /* Try to find layer size to configure iterator */
-      if ( !base_glyph_v1_record.layer_list_offset ||
-           base_glyph_v1_record.layer_list_offset > colr->table_size )
-        return 0;
-
-      p                    = (FT_Byte*)( colr->base_glyphs_v1 +
-                      base_glyph_v1_record.layer_list_offset );
-      if ( p >= (FT_Byte*)( colr->table + colr->table_size ) )
-        return 0;
-
-      iterator->num_layers = FT_NEXT_BYTE ( p );
-
-      iterator->p = p;
-    }
-
-    if ( iterator->layer >= iterator->num_layers )
+    if ( !find_base_glyph_v1_record( colr->base_glyphs_v1,
+                                     colr->num_base_glyphs_v1, base_glyph,
+                                     &base_glyph_v1_record ) )
       return 0;
 
+    if ( !base_glyph_v1_record.paint_offset ||
+         base_glyph_v1_record.paint_offset > colr->table_size )
+      return 0;
+
+    p = (FT_Byte*)( colr->base_glyphs_v1 +
+                    base_glyph_v1_record.paint_offset );
+    if ( p >= (FT_Byte*)( colr->table + colr->table_size ) )
+      return 0;
+
+    opaque_paint->p = p;
+
+    return 1;
+  }
+
+  FT_LOCAL_DEF ( FT_Bool )
+  tt_face_get_paint_layers( TT_Face           face,
+                            FT_LayerIterator* iterator,
+                            FT_OpaquePaint*   paint )
+  {
+
+#if 0
     /* We have an iterator pointing at a paint offset as part of the paintOffset array in LayerV1List */
     p = iterator->p;
 
@@ -607,17 +628,11 @@
     iterator->p = p;
 
     iterator->layer++;
+
+    return 1;
+
 #endif
-
-    return 1;
-  }
-
-  FT_LOCAL_DEF ( FT_Bool )
-  tt_face_get_paint_layers( TT_Face           face,
-                            FT_LayerIterator* iterator,
-                            FT_OpaquePaint*   paint )
-  {
-    return 1;
+    return 0;
   }
 
   FT_LOCAL_DEF ( FT_Bool )
