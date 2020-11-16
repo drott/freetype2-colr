@@ -607,32 +607,39 @@
     return 1;
   }
 
-  FT_LOCAL_DEF ( FT_Bool )
+  FT_LOCAL_DEF( FT_Bool )
   tt_face_get_paint_layers( TT_Face           face,
                             FT_LayerIterator* iterator,
-                            FT_OpaquePaint*   paint )
+                            FT_OpaquePaint*   opaque_paint )
   {
+    FT_Byte * p = NULL, *p_layer_v1_list = NULL;
+    FT_UInt32 paint_offset;
 
-#if 0
-    /* We have an iterator pointing at a paint offset as part of the paintOffset array in LayerV1List */
+    Colr* colr = (Colr*)face->colr;
+
+    if ( !colr )
+      return 0;
+
+    /* We have an iterator pointing at a paint offset as part of the paintOffset
+     * array in LayerV1List */
     p = iterator->p;
 
-    p_layer_v1_list = p - iterator->layer * LAYER_V1_LIST_PAINT_OFFSET_SIZE - 1 /* numLayers */;
+    // TODO: Is this still needed, i.e. counting backwards to beginning? Just
+    // use colr->layers_v1 here?
+    p_layer_v1_list = p - iterator->layer * LAYER_V1_LIST_PAINT_OFFSET_SIZE -
+                      1 /* numLayers */;
     if ( p_layer_v1_list < (FT_Byte*)( colr->base_glyphs_v1 ) ||
          p_layer_v1_list > (FT_Byte*)( colr->table + colr->table_size ) )
       return 0;
 
-    paint_offset = FT_NEXT_ULONG( p );
-    opaque_paint->p = (FT_Byte*)(p_layer_v1_list + paint_offset);
+    paint_offset    = FT_NEXT_ULONG( p );
+    opaque_paint->p = (FT_Byte*)( p_layer_v1_list + paint_offset );
 
     iterator->p = p;
 
     iterator->layer++;
 
     return 1;
-
-#endif
-    return 0;
   }
 
   FT_LOCAL_DEF ( FT_Bool )
