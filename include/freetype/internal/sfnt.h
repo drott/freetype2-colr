@@ -523,11 +523,13 @@ FT_BEGIN_HEADER
                              FT_UInt           *acolor_index,
                              FT_LayerIterator*  iterator );
 
-  typedef FT_Bool
-  ( *TT_Get_Color_Glyph_Layer_Gradients_Func ) ( TT_Face           face,
-                                                 FT_UInt           base_glyph,
-                                                 FT_OpaquePaint *   paint,
-                                                 FT_LayerIterator *iterator );
+  typedef FT_Bool ( *TT_Get_Color_Glyph_Paint_Func )( TT_Face face,
+                                                      FT_UInt base_glyph,
+                                                      FT_OpaquePaint* paint );
+
+  typedef FT_Bool ( *TT_Get_Paint_Layers_Func )( TT_Face           face,
+                                                 FT_LayerIterator* iterator,
+                                                 FT_OpaquePaint*   paint );
 
   typedef FT_Bool
   ( *TT_Get_Colorline_Stops_Func ) ( TT_Face face,
@@ -779,16 +781,17 @@ FT_BEGIN_HEADER
     TT_Set_SBit_Strike_Func      set_sbit_strike;
     TT_Load_Strike_Metrics_Func  load_strike_metrics;
 
-    TT_Load_Table_Func           load_cpal;
-    TT_Load_Table_Func           load_colr;
-    TT_Free_Table_Func           free_cpal;
-    TT_Free_Table_Func           free_colr;
-    TT_Set_Palette_Func          set_palette;
-    TT_Get_Colr_Layer_Func       get_colr_layer;
-    TT_Get_Color_Glyph_Layer_Gradients_Func get_colr_layer_gradients;
-    TT_Get_Colorline_Stops_Func             get_colorline_stops;
-    TT_Get_Paint_Func                       get_paint;
-    TT_Blend_Colr_Func           colr_blend;
+    TT_Load_Table_Func            load_cpal;
+    TT_Load_Table_Func            load_colr;
+    TT_Free_Table_Func            free_cpal;
+    TT_Free_Table_Func            free_colr;
+    TT_Set_Palette_Func           set_palette;
+    TT_Get_Colr_Layer_Func        get_colr_layer;
+    TT_Get_Color_Glyph_Paint_Func get_colr_glyph_paint;
+    TT_Get_Paint_Layers_Func      get_paint_layers;
+    TT_Get_Colorline_Stops_Func   get_colorline_stops;
+    TT_Get_Paint_Func             get_paint;
+    TT_Blend_Colr_Func            colr_blend;
 
     TT_Get_Metrics_Func          get_metrics;
 
@@ -837,7 +840,8 @@ FT_BEGIN_HEADER
           free_colr_,                    \
           set_palette_,                  \
           get_colr_layer_,               \
-          get_colr_layer_gradients_,     \
+          get_colr_glyph_paint_,         \
+          get_paint_layers_,             \
           get_colorline_stops_,          \
           get_paint_,                    \
           colr_blend_,                   \
@@ -880,7 +884,8 @@ FT_BEGIN_HEADER
     free_colr_,                          \
     set_palette_,                        \
     get_colr_layer_,                     \
-    get_colr_layer_gradients_,           \
+    get_colr_glyph_paint_,               \
+    get_paint_layers_,                   \
     get_colorline_stops_,                \
     get_paint_,                          \
     colr_blend_,                         \

@@ -1290,8 +1290,10 @@
           /* TT_Set_Palette_Func     set_palette     */
           PUT_COLOR_LAYERS( tt_face_get_colr_layer ),
           /* TT_Get_Colr_Layer_Func  get_colr_layer  */
-          PUT_COLOR_LAYERS_V1( tt_face_get_colr_layer_gradients ),
-          /* TT_Get_Colr_Layer_Gradients_Func  get_colr_layer_gradients  */
+          PUT_COLOR_LAYERS_V1( tt_face_get_colr_glyph_paint ),
+          /* TT_Get_Colr_Glyph_Paint_Func  get_colr_glyph_paint  */
+          PUT_COLOR_LAYERS_V1( tt_face_get_paint_layers ),
+          /* TT_Get_Paint_Layers_Func  get_paint_layers  */
           PUT_COLOR_LAYERS_V1( tt_face_get_colorline_stops ),
           /* TT_Get_Paint  get_paint  */
           PUT_COLOR_LAYERS_V1( tt_face_get_paint ),

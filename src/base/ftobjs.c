@@ -5569,15 +5569,14 @@
   }
 
   FT_EXPORT_DEF ( FT_Bool )
-  FT_Get_Color_Glyph_Layer_Gradients( FT_Face           face,
-                                      FT_UInt           base_glyph,
-                                      FT_OpaquePaint*   paint,
-                                      FT_LayerIterator* iterator )
+  FT_Get_Color_Glyph_Paint( FT_Face         face,
+                            FT_UInt         base_glyph,
+                            FT_OpaquePaint* paint )
   {
     TT_Face       ttface;
     SFNT_Service  sfnt;
 
-    if ( !face || !paint || !iterator )
+    if ( !face || !paint )
       return 0;
 
     if ( !FT_IS_SFNT( face ) )
@@ -5587,13 +5586,35 @@
     sfnt   = (SFNT_Service)ttface->sfnt;
 
     if ( sfnt->get_colr_layer )
-      return sfnt->get_colr_layer_gradients ( ttface,
-                                              base_glyph,
-                                              paint,
-                                              iterator );
+      return sfnt->get_colr_glyph_paint( ttface, base_glyph, paint );
     else
       return 0;
   }
+
+
+  FT_EXPORT_DEF ( FT_Bool )
+  FT_Get_Paint_Layers( FT_Face           face,
+                       FT_LayerIterator* layer_iterator,
+                       FT_OpaquePaint*   paint )
+  {
+    TT_Face       ttface;
+    SFNT_Service  sfnt;
+
+    if ( !face || !paint || !layer_iterator )
+      return 0;
+
+    if ( !FT_IS_SFNT( face ) )
+      return 0;
+
+    ttface = (TT_Face)face;
+    sfnt   = (SFNT_Service)ttface->sfnt;
+
+    if ( sfnt->get_paint_layers )
+      return sfnt->get_paint_layers( ttface, layer_iterator, paint );
+    else
+      return 0;
+  }
+
 
   FT_EXPORT_DEF( FT_Bool )
   FT_Get_Paint( FT_Face face, FT_OpaquePaint opaque_paint, FT_COLR_Paint* paint )

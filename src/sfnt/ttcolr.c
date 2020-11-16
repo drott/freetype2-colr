@@ -60,7 +60,7 @@
   {
     FT_UShort gid;
     /* Offset from start of BaseGlyphV1List, i.e. from base_glyphs_v1. */
-    FT_ULong layer_list_offset;
+    FT_ULong paint_offset;
   } BaseGlyphV1Record;
 
   typedef struct Colr_
@@ -75,6 +75,9 @@
     FT_ULong  num_base_glyphs_v1;
     /* Points at beginning of BaseGlyphV1List. */
     FT_Byte*  base_glyphs_v1;
+
+    FT_ULong  num_layers_v1;
+    FT_Byte*  layers_v1;
 
     /* The memory which backs up the `COLR' table. */
     void*     table;
@@ -102,11 +105,13 @@
 
     FT_Byte *table = NULL;
     FT_Byte *p = NULL;
+    /* Needed for reading array lengths in referenced tables. */
+    FT_Byte *p1 = NULL;
 
     Colr*  colr = NULL;
 
-    FT_ULong base_glyph_offset, layer_offset, base_glyphs_v1_offset,
-        num_base_glyphs_v1;
+    FT_ULong base_glyph_offset, layer_offset, base_glyphs_offset_v1,
+        num_base_glyphs_v1, layer_offset_v1, num_layers_v1;
     FT_ULong  table_size;
 
 
@@ -151,21 +156,33 @@
       goto InvalidTable;
 
     if ( colr->version == 1 ) {
-      base_glyphs_v1_offset = FT_NEXT_ULONG( p );
+      base_glyphs_offset_v1 = FT_NEXT_ULONG( p );
 
-      if ( base_glyphs_v1_offset >= table_size )
+      if ( base_glyphs_offset_v1 >= table_size )
         goto InvalidTable;
 
-      p = (FT_Byte*)( table + base_glyphs_v1_offset );
-      num_base_glyphs_v1 = FT_PEEK_ULONG( p );
+      p1 = (FT_Byte*)( table + base_glyphs_offset_v1 );
+      num_base_glyphs_v1 = FT_PEEK_ULONG( p1 );
 
       if ( num_base_glyphs_v1 * BASE_GLYPH_V1_RECORD_SIZE >
-           table_size - base_glyphs_v1_offset )
+           table_size - base_glyphs_offset_v1 )
       {
         goto InvalidTable;
       }
+
       colr->num_base_glyphs_v1 = num_base_glyphs_v1;
-      colr->base_glyphs_v1     = p;
+      colr->base_glyphs_v1     = p1;
+
+      layer_offset_v1 = FT_NEXT_ULONG( p );
+
+      if ( layer_offset_v1 >= table_size )
+        goto InvalidTable;
+
+      p1 = (FT_Byte*)( table + layer_offset_v1 );
+      num_layers_v1 = FT_PEEK_ULONG( p1 );
+
+      colr->num_layers_v1 = num_layers_v1;
+      colr->layers_v1 = p1;
     }
 
     colr->base_glyphs = (FT_Byte*)( table + base_glyph_offset );
@@ -522,7 +539,7 @@
       else
       {
         record->gid                = gid;
-        record->layer_list_offset = FT_NEXT_ULONG ( p );
+        record->paint_offset = FT_NEXT_ULONG ( p );
         return 1;
       }
     }
@@ -531,10 +548,9 @@
   }
 
   FT_LOCAL_DEF ( FT_Bool )
-  tt_face_get_colr_layer_gradients( TT_Face           face,
-                                    FT_UInt           base_glyph,
-                                    FT_OpaquePaint*   opaque_paint,
-                                    FT_LayerIterator* iterator )
+  tt_face_get_colr_glyph_paint( TT_Face         face,
+                                FT_UInt         base_glyph,
+                                FT_OpaquePaint* opaque_paint )
   {
     Colr* colr = (Colr*)face->colr;
     BaseGlyphV1Record base_glyph_v1_record;
@@ -548,6 +564,8 @@
     if ( opaque_paint->p )
       return 0;
 
+#if 0
+    // TODO, just return a PaintColrLayers here, handle layer iteration in that paint retrieval
     if ( !iterator->p )
     {
       iterator->layer = 0;
@@ -589,7 +607,16 @@
     iterator->p = p;
 
     iterator->layer++;
+#endif
 
+    return 1;
+  }
+
+  FT_LOCAL_DEF ( FT_Bool )
+  tt_face_get_paint_layers( TT_Face           face,
+                            FT_LayerIterator* iterator,
+                            FT_OpaquePaint*   paint )
+  {
     return 1;
   }
 

@@ -4217,14 +4217,15 @@ FT_BEGIN_HEADER
    */
   typedef enum FT_PaintFormat_
   {
-    COLR_PAINTFORMAT_SOLID           = 1,
-    COLR_PAINTFORMAT_LINEAR_GRADIENT = 2,
-    COLR_PAINTFORMAT_RADIAL_GRADIENT = 3,
-    COLR_PAINTFORMAT_GLYPH           = 4,
-    COLR_PAINTFORMAT_COLR_GLYPH      = 5,
-    COLR_PAINTFORMAT_TRANSFORMED     = 6,
-    COLR_PAINTFORMAT_COMPOSITE       = 7,
-    COLR_PAINT_FORMAT_MAX            = 8,
+    COLR_PAINTFORAMT_COLR_LAYERS     = 1,
+    COLR_PAINTFORMAT_SOLID           = 2,
+    COLR_PAINTFORMAT_LINEAR_GRADIENT = 3,
+    COLR_PAINTFORMAT_RADIAL_GRADIENT = 4,
+    COLR_PAINTFORMAT_GLYPH           = 5,
+    COLR_PAINTFORMAT_COLR_GLYPH      = 6,
+    COLR_PAINTFORMAT_TRANSFORMED     = 7,
+    COLR_PAINTFORMAT_COMPOSITE       = 8,
+    COLR_PAINT_FORMAT_MAX            = 9,
     COLR_PAINTFORMAT_UNSUPPORTED     = 255
   } FT_PaintFormat;
 
@@ -4364,6 +4365,11 @@ FT_BEGIN_HEADER
     FT_PaintExtend       extend;
     FT_ColorStopIterator color_stop_iterator;
   } FT_ColorLine;
+
+  typedef struct FT_PaintColrLayers_
+  {
+    FT_LayerIterator layer_iterator;
+  } FT_PaintColrLayers;
 
   /**************************************************************************
    *
@@ -4558,6 +4564,7 @@ FT_BEGIN_HEADER
     FT_PaintFormat format;
     union
     {
+      FT_PaintColrLayers     colr_layers;
       FT_PaintGlyph          glyph;
       FT_PaintSolid          solid;
       FT_PaintLinearGradient linear_gradient;
@@ -4606,10 +4613,19 @@ FT_BEGIN_HEADER
    * error, value~0 is returned also.
    */
   FT_EXPORT( FT_Bool )
-  FT_Get_Color_Glyph_Layer_Gradients( FT_Face           face,
-                                      FT_UInt           base_glyph,
-                                      FT_OpaquePaint*   paint,
-                                      FT_LayerIterator* iterator );
+  FT_Get_Color_Glyph_Paint( FT_Face         face,
+                            FT_UInt         base_glyph,
+                            FT_OpaquePaint* paint );
+
+  /* Accesses the layers/paints of a PaintColrGlyph as FT_OpaquePaint* output
+   * objects through the FT_LayerIterator that is retrieved from the
+   * PaintColrGlyph struct retrieved through FT_Get_Paint for a PaintColrGlyph
+   * FT_OpaquePaint.
+   */
+  FT_EXPORT( FT_Bool )
+  FT_Get_Paint_Layers( FT_Face           face,
+                       FT_LayerIterator* iterator,
+                       FT_OpaquePaint*   paint );
 
   /**************************************************************************
    *
