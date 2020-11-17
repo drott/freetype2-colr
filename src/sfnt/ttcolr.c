@@ -589,7 +589,7 @@
                             FT_LayerIterator* iterator,
                             FT_OpaquePaint*   opaque_paint )
   {
-    FT_Byte * p = NULL, *p_layer_v1_list = NULL;
+    FT_Byte * p = NULL, *p_first_layer = NULL;
     FT_UInt32 paint_offset;
 
     if ( iterator->layer == iterator->num_layers )
@@ -605,16 +605,19 @@
     p = iterator->p;
 
     /* Sanity check the cursor of the iterator. Counting backwards from where it
-     * stands, we need to end up on the beginning of the LayerV1List table. */
-    p_layer_v1_list = p - iterator->layer * LAYER_V1_LIST_PAINT_OFFSET_SIZE -
+     * stands, we need to end up at a position after the beginning of the
+     * LayerV1List table and not after the end of the LayerV1List. */
+    p_first_layer = p - iterator->layer * LAYER_V1_LIST_PAINT_OFFSET_SIZE -
                       LAYER_V1_LIST_NUM_LAYERS_SIZE;
-    if ( p_layer_v1_list != (FT_Byte*)( colr->layers_v1 ))
+    if ( p_first_layer < (FT_Byte*)( colr->layers_v1 ))
       return 0;
-    if ( p_layer_v1_list >= (FT_Byte*)( colr->table + colr->table_size ) )
+    if ( p_first_layer >=
+         (FT_Byte*)( colr->layers_v1 + LAYER_V1_LIST_NUM_LAYERS_SIZE +
+                     colr->num_layers_v1 * LAYER_V1_LIST_PAINT_OFFSET_SIZE ) )
       return 0;
 
     paint_offset    = FT_NEXT_ULONG( p );
-    opaque_paint->p = (FT_Byte*)( p_layer_v1_list + paint_offset );
+    opaque_paint->p = (FT_Byte*)( colr->layers_v1 + paint_offset );
 
     iterator->p = p;
 
