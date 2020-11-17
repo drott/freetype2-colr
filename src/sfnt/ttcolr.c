@@ -43,6 +43,7 @@
 #define BASE_GLYPH_SIZE                  6U
 #define BASE_GLYPH_V1_RECORD_SIZE        6U
 #define LAYER_V1_LIST_PAINT_OFFSET_SIZE  4U
+#define LAYER_V1_LIST_NUM_LAYERS_SIZE    4U
 #define COLOR_STOP_SIZE                  6U
 #define LAYER_SIZE                       4U
 #define COLR_HEADER_SIZE                14U
@@ -175,7 +176,7 @@
 
       layer_offset_v1 = FT_NEXT_ULONG( p );
 
-      if ( layer_offset_v1 >= table_size )
+      if ( !layer_offset_v1 || layer_offset_v1 >= table_size )
         goto InvalidTable;
 
       p1 = (FT_Byte*)( table + layer_offset_v1 );
@@ -392,7 +393,7 @@
       apaint->u.colr_layers.layer_iterator.layer      = 0;
       // TODO: Check if pointer is outside colr?
       apaint->u.colr_layers.layer_iterator.p =
-          colr->layers_v1 +
+          colr->layers_v1 + LAYER_V1_LIST_NUM_LAYERS_SIZE +
           ( LAYER_V1_LIST_PAINT_OFFSET_SIZE * first_layer_index );
 
       return 1;
@@ -615,6 +616,9 @@
     FT_Byte * p = NULL, *p_layer_v1_list = NULL;
     FT_UInt32 paint_offset;
 
+    if ( iterator->layer == iterator->num_layers )
+      return 0;
+
     Colr* colr = (Colr*)face->colr;
 
     if ( !colr )
@@ -624,12 +628,13 @@
      * array in LayerV1List */
     p = iterator->p;
 
-    // TODO: Is this still needed, i.e. counting backwards to beginning? Just
-    // use colr->layers_v1 here?
+    /* Sanity check the cursor of the iterator. Counting backwards from where it
+     * stands, we need to end up on the beginning of the LayerV1List table. */
     p_layer_v1_list = p - iterator->layer * LAYER_V1_LIST_PAINT_OFFSET_SIZE -
-                      1 /* numLayers */;
-    if ( p_layer_v1_list < (FT_Byte*)( colr->base_glyphs_v1 ) ||
-         p_layer_v1_list > (FT_Byte*)( colr->table + colr->table_size ) )
+                      LAYER_V1_LIST_NUM_LAYERS_SIZE;
+    if ( p_layer_v1_list != (FT_Byte*)( colr->layers_v1 ))
+      return 0;
+    if ( p_layer_v1_list >= (FT_Byte*)( colr->table + colr->table_size ) )
       return 0;
 
     paint_offset    = FT_NEXT_ULONG( p );
