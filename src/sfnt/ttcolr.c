@@ -339,30 +339,6 @@
   }
 
   static FT_Bool
-  read_affine ( Colr *     colr,
-                FT_Byte *  paint_base,
-                FT_ULong   affine_offset,
-                FT_Matrix *affine )
-  {
-    FT_Byte *p = (FT_Byte *)( paint_base + affine_offset );
-    /* TODO: Check pointer limits against colr->table etc. */
-
-    if ( !affine_offset )
-      return 0;
-
-    affine->xx = FT_NEXT_LONG ( p );
-    FT_NEXT_ULONG ( p ); /* drop varIdx */
-    affine->xy = FT_NEXT_LONG ( p );
-    FT_NEXT_ULONG ( p ); /* drop varIdx */
-    affine->yx = FT_NEXT_LONG ( p );
-    FT_NEXT_ULONG ( p ); /* drop varIdx */
-    affine->yy = FT_NEXT_LONG ( p );
-    FT_NEXT_ULONG ( p ); /* drop varIdx */
-
-    return 1;
-  }
-
-  static FT_Bool
   read_paint( Colr* colr, FT_Byte* p, FT_COLR_Paint* apaint )
   {
     FT_Byte *paint_base;
@@ -489,9 +465,9 @@
 
       apaint->u.transformed.affine.xx = FT_NEXT_LONG( p );
       FT_NEXT_ULONG( p ); /* drop varIdx */
-      apaint->u.transformed.affine.xy = FT_NEXT_LONG( p );
-      FT_NEXT_ULONG( p ); /* drop varIdx */
       apaint->u.transformed.affine.yx = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.transformed.affine.xy = FT_NEXT_LONG( p );
       FT_NEXT_ULONG( p ); /* drop varIdx */
       apaint->u.transformed.affine.yy = FT_NEXT_LONG( p );
       FT_NEXT_ULONG( p ); /* drop varIdx */

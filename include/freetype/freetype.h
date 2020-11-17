@@ -4481,12 +4481,46 @@ FT_BEGIN_HEADER
     FT_UInt glyphID;
   } FT_PaintColrGlyph;
 
+
+
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_Affine23
+   *
+   * @description:
+   *   A structure used to store a 2x3 matrix.  Coefficients are in
+   *   16.16 fixed-point format.  The computation performed is:
+   *
+   *   ```
+   *     x' = x*xx + y*xy + dx
+   *     y' = x*yx + y*yy + dy
+   *   ```
+   *
+   * @fields:
+   *   xx ::
+   *     Matrix coefficient.
+   *
+   *   xy ::
+   *     Matrix coefficient.
+   *
+   *   dx ::
+   *     x translation.
+   *
+   *   yx ::
+   *     Matrix coefficient.
+   *
+   *   yy ::
+   *     Matrix coefficient.
+   *
+   *   dy ::
+   *     y translation.
+   *
+   */
   typedef struct FT_Affine_23_
   {
-    FT_Fixed  xx, xy;
-    FT_Fixed  yx, yy;
-    FT_Fixed  dx, dy;
-
+    FT_Fixed  xx, xy, dx;
+    FT_Fixed  yx, yy, dy;
   } FT_Affine23;
 
   typedef struct FT_PaintTransformed_
