@@ -4224,8 +4224,10 @@ FT_BEGIN_HEADER
     COLR_PAINTFORMAT_GLYPH           = 5,
     COLR_PAINTFORMAT_COLR_GLYPH      = 6,
     COLR_PAINTFORMAT_TRANSFORMED     = 7,
-    COLR_PAINTFORMAT_COMPOSITE       = 8,
-    COLR_PAINT_FORMAT_MAX            = 9,
+    COLR_PAINTFORMAT_ROTATE          = 8,
+    COLR_PAINTFORMAT_SKEW            = 9,
+    COLR_PAINTFORMAT_COMPOSITE       = 10,
+    COLR_PAINT_FORMAT_MAX            = 11,
     COLR_PAINTFORMAT_UNSUPPORTED     = 255
   } FT_PaintFormat;
 
@@ -4561,6 +4563,22 @@ FT_BEGIN_HEADER
     COLR_COMPOSITE_MAX            = 27
   } FT_Composite_Mode;
 
+  typedef struct FT_PaintRotate_ {
+    FT_OpaquePaint paint;
+    FT_Fixed       angle;
+    FT_Fixed       center_x;
+    FT_Fixed       center_y;
+  } FT_PaintRotate;
+
+  typedef struct FT_PaintSkew_
+  {
+    FT_OpaquePaint paint;
+    FT_Fixed       x_skew_angle;
+    FT_Fixed       y_skew_angle;
+    FT_Fixed       center_x;
+    FT_Fixed       center_y;
+  } FT_PaintSkew;
+
   typedef struct FT_PaintComposite_
   {
     FT_OpaquePaint   source_paint;
@@ -4604,6 +4622,8 @@ FT_BEGIN_HEADER
       FT_PaintLinearGradient linear_gradient;
       FT_PaintRadialGradient radial_gradient;
       FT_PaintTransformed    transformed;
+      FT_PaintRotate         rotate;
+      FT_PaintSkew           skew;
       FT_PaintComposite      composite;
       FT_PaintColrGlyph      colr_glyph;
     } u;

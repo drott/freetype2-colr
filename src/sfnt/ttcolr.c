@@ -476,6 +476,48 @@
       apaint->u.transformed.affine.dy = FT_NEXT_LONG( p );
       FT_NEXT_ULONG( p ); /* drop varIdx */
     }
+    else if ( apaint->format == COLR_PAINTFORMAT_ROTATE )
+    {
+      FT_UInt32 paint_offset = 0;
+      FT_Byte*  paint_p;
+      paint_offset = FT_NEXT_UOFF3( p );
+      if ( !paint_offset )
+        return 0;
+      paint_p = (FT_Byte*)( paint_base + paint_offset );
+      if ( paint_p > (FT_Byte*)( colr->table + colr->table_size ) )
+        return 0;
+
+      apaint->u.rotate.paint.p = paint_p;
+
+      apaint->u.rotate.angle = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.rotate.center_x = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.rotate.center_y = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+    }
+    else if ( apaint->format == COLR_PAINTFORMAT_SKEW )
+    {
+      FT_UInt32 paint_offset = 0;
+      FT_Byte*  paint_p;
+      paint_offset = FT_NEXT_UOFF3( p );
+      if ( !paint_offset )
+        return 0;
+      paint_p = (FT_Byte*)( paint_base + paint_offset );
+      if ( paint_p > (FT_Byte*)( colr->table + colr->table_size ) )
+        return 0;
+
+      apaint->u.skew.paint.p = paint_p;
+
+      apaint->u.skew.x_skew_angle = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.skew.y_skew_angle = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.skew.center_x = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.skew.center_y = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+    }
     else if ( apaint->format == COLR_PAINTFORMAT_COMPOSITE )
     {
       FT_UInt32 paint_offset = 0;
