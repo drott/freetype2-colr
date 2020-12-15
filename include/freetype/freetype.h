@@ -2902,7 +2902,7 @@ FT_BEGIN_HEADER
    *
    *     If the font is 'tricky' (see @FT_FACE_FLAG_TRICKY for more), using
    *     `FT_LOAD_NO_SCALE` usually yields meaningless outlines because the
-   *     subglyphs must be scaled and positioned with hinting instructions. 
+   *     subglyphs must be scaled and positioned with hinting instructions.
    *     This can be solved by loading the font without `FT_LOAD_NO_SCALE`
    *     and setting the character size to `font->units_per_EM`.
    *
@@ -4323,26 +4323,6 @@ FT_BEGIN_HEADER
     COLR_PAINT_EXTEND_REFLECT = 2
   } FT_PaintExtend;
 
-  /**************************************************************************
-   *
-   * @struct:
-   *   FT_PaintSolid
-   *
-   * @description:
-   *   Struct representing a PaintSolid of the COLR v1 extensions,
-   *   see https://github.com/googlefonts/colr-gradients-spec
-   *   Means that the glyph layer filled with this paint will be
-   *   solid colored and not contain a gradient.
-   *
-   *
-   * @fields:
-   *   color ::
-   *     The color information for this solid paint, see @FT_PaintColor.
-   */
-  typedef struct FT_PaintSolid_
-  {
-    FT_PaintColor color;
-  } FT_PaintSolid;
 
   /**************************************************************************
    *
@@ -4368,10 +4348,164 @@ FT_BEGIN_HEADER
     FT_ColorStopIterator color_stop_iterator;
   } FT_ColorLine;
 
+
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_Affine23
+   *
+   *
+   * @description:
+   *   A structure used to store a 2x3 matrix.  Coefficients are in
+   *   16.16 fixed-point format.  The computation performed is:
+   *
+   *   ```
+   *     x' = x*xx + y*xy + dx
+   *     y' = x*yx + y*yy + dy
+   *   ```
+   *
+   * @fields:
+   *   xx ::
+   *     Matrix coefficient.
+   *
+   *   xy ::
+   *     Matrix coefficient.
+   *
+   *   dx ::
+   *     x translation.
+   *
+   *   yx ::
+   *     Matrix coefficient.
+   *
+   *   yy ::
+   *     Matrix coefficient.
+   *
+   *   dy ::
+   *     y translation.
+   *
+   */
+  typedef struct FT_Affine_23_
+  {
+    FT_Fixed  xx, xy, dx;
+    FT_Fixed  yx, yy, dy;
+  } FT_Affine23;
+
+
+  /**************************************************************************
+   *
+   * @enum:
+   *   FT_CompositeMode
+   *
+   * @description:
+   *   Enum listing the COLRv1 composite modes used in @FT_PaintComposite.
+   *   For more details on each paint mode, see
+   *   https://www.w3.org/TR/compositing-1/#porterduffcompositingoperators
+   */
+  typedef enum
+  {
+    COLR_COMPOSITE_CLEAR          = 0,
+    COLR_COMPOSITE_SRC            = 1,
+    COLR_COMPOSITE_DEST           = 2,
+    COLR_COMPOSITE_SRC_OVER       = 3,
+    COLR_COMPOSITE_DEST_OVER      = 4,
+    COLR_COMPOSITE_SRC_IN         = 5,
+    COLR_COMPOSITE_DEST_IN        = 6,
+    COLR_COMPOSITE_SRC_OUT        = 7,
+    COLR_COMPOSITE_DEST_OUT       = 8,
+    COLR_COMPOSITE_SRC_ATOP       = 9,
+    COLR_COMPOSITE_DEST_ATOP      = 10,
+    COLR_COMPOSITE_XOR            = 11,
+    COLR_COMPOSITE_SCREEN         = 12,
+    COLR_COMPOSITE_OVERLAY        = 13,
+    COLR_COMPOSITE_DARKEN         = 14,
+    COLR_COMPOSITE_LIGHTEN        = 15,
+    COLR_COMPOSITE_COLOR_DODGE    = 16,
+    COLR_COMPOSITE_COLOR_BURN     = 17,
+    COLR_COMPOSITE_HARD_LIGHT     = 18,
+    COLR_COMPOSITE_SOFT_LIGHT     = 19,
+    COLR_COMPOSITE_DIFFERENCE     = 20,
+    COLR_COMPOSITE_EXCLUSION      = 21,
+    COLR_COMPOSITE_MULTIPLY       = 22,
+    COLR_COMPOSITE_HSL_HUE        = 23,
+    COLR_COMPOSITE_HSL_SATURATION = 24,
+    COLR_COMPOSITE_HSL_COLOR      = 25,
+    COLR_COMPOSITE_HSL_LUMINOSITY = 26,
+    COLR_COMPOSITE_MAX            = 27
+  } FT_Composite_Mode;
+
+
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_OpaquePaint
+   *
+   * @description:
+   *
+   *   Struct representing an offset to a Paint stored in any of the paint
+   *   tables of a COLRv1 font. Compare Offset<24> there. When COLRv1 paint
+   *   tables represented by FreeType objects such as @FT_PaintColrLayers,
+   *   @FT_PaintComposite or @FT_PaintTransform reference downstream nested
+   *   paint tables, we do not immediately retrieve them, but encapsulate their
+   *   location in this type. Use @FT_Get_Paint to retrieve the actual
+   *   @FT_COLR_Paint object that describes the details of the respective paint
+   *   table.
+   *
+   * @fields:
+   *   p ::
+   *     An internal offset to a Paint table, needs to be set to NULL before
+   *     passing this struct as an argument to FT_Get_Paint.
+   */
+  typedef struct FT_Opaque_Paint_
+  {
+    FT_Byte* p;
+  } FT_OpaquePaint;
+
+
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_PaintColrLayers
+   *
+   * @description:
+   *
+   *   Struct representing a PaintColrLayers table of a COLRv1 font.  This table
+   *   describes a set of layers that are to be composited with composite mode
+   *   @COLR_COMPOSITE_SRC_OVER. The return value of this function is a
+   *   @FT_LayerIterator initialized so that it can be used with
+   *   @FT_Get_Paint_Layers to retrieve the @FT_OpaquePaint objects as
+   *   references to each layer.
+   *
+   * @fields:
+   *   layer_iterator ::
+   *     The layer iterator that describes the layers of this paint.
+   */
   typedef struct FT_PaintColrLayers_
   {
     FT_LayerIterator layer_iterator;
   } FT_PaintColrLayers;
+
+
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_PaintSolid
+   *
+   * @description:
+   *   Struct representing a PaintSolid of the COLR v1 extensions,
+   *   see https://github.com/googlefonts/colr-gradients-spec
+   *   Means that the glyph layer filled with this paint will be
+   *   solid colored and not contain a gradient.
+   *
+   *
+   * @fields:
+   *   color ::
+   *     The color information for this solid paint, see @FT_PaintColor.
+   */
+  typedef struct FT_PaintSolid_
+  {
+    FT_PaintColor color;
+  } FT_PaintSolid;
+
 
   /**************************************************************************
    *
@@ -4451,117 +4585,89 @@ FT_BEGIN_HEADER
     FT_UShort      r1;
   } FT_PaintRadialGradient;
 
+
   /**************************************************************************
    *
    * @struct:
-   *   FT_OpaquePaint
+   *   FT_PaintGlyph
    *
    * @description:
-   *   Struct representing an offset to a Paint stored in the COLR table, see
-   *   Offset<24>,
-   * https://github.com/googlefonts/colr-gradients-spec/blob/master/colr-gradients-spec.md#off-43-data-types
-   *
+   *   Struct representing a COLRv1 PaintGlyph paint table.
    *
    * @fields:
-   *   p ::
-   *     An internal offset to a Paint table, needs to be set to NULL before
-   *     passing this struct as an argument to FT_Get_Paint.
+   *   paint ::
+   *     An opaque paint object pointing to a Paint table that serves as the
+   *     fill for the glyph id.
+   *   glyphID ::
+   *     The glyph id from the glyf table which serves as the contour
+   *     information that is filled with paint.
    */
-  typedef struct FT_Opaque_Paint_
-  {
-    FT_Byte* p;
-  } FT_OpaquePaint;
-
   typedef struct FT_PaintGlyph_
   {
     FT_OpaquePaint paint;
     FT_UInt glyphID;
   } FT_PaintGlyph;
 
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_PaintColrGlyph
+   *
+   * @description:
+   *   Struct representing a COLRv1 PaintColorGlyph paint table.
+   *
+   *
+   * @fields:
+   *   glyphID ::
+   *     The glyph id from the BaseGlyphV1List that is drawn for this paint.
+   */
   typedef struct FT_PaintColrGlyph_
   {
     FT_UInt glyphID;
   } FT_PaintColrGlyph;
 
 
-
   /**************************************************************************
    *
    * @struct:
-   *   FT_Affine23
+   *   FT_PaintTransformed
    *
    * @description:
-   *   A structure used to store a 2x3 matrix.  Coefficients are in
-   *   16.16 fixed-point format.  The computation performed is:
-   *
-   *   ```
-   *     x' = x*xx + y*xy + dx
-   *     y' = x*yx + y*yy + dy
-   *   ```
+   *   Struct representing a COLRv1 PaintTransformed paint table.
    *
    * @fields:
-   *   xx ::
-   *     Matrix coefficient.
-   *
-   *   xy ::
-   *     Matrix coefficient.
-   *
-   *   dx ::
-   *     x translation.
-   *
-   *   yx ::
-   *     Matrix coefficient.
-   *
-   *   yy ::
-   *     Matrix coefficient.
-   *
-   *   dy ::
-   *     y translation.
-   *
+   *   paint ::
+   *     An opaque paint that is subject to being transformed.
+   *   affine ::
+   *     A 2x3 transformation matrix in @FT_Affine23 format.
    */
-  typedef struct FT_Affine_23_
-  {
-    FT_Fixed  xx, xy, dx;
-    FT_Fixed  yx, yy, dy;
-  } FT_Affine23;
-
   typedef struct FT_PaintTransformed_
   {
     FT_OpaquePaint paint;
     FT_Affine23 affine;
   } FT_PaintTransformed;
 
-  typedef enum
-  {
-    COLR_COMPOSITE_CLEAR          = 0,
-    COLR_COMPOSITE_SRC            = 1,
-    COLR_COMPOSITE_DEST           = 2,
-    COLR_COMPOSITE_SRC_OVER       = 3,
-    COLR_COMPOSITE_DEST_OVER      = 4,
-    COLR_COMPOSITE_SRC_IN         = 5,
-    COLR_COMPOSITE_DEST_IN        = 6,
-    COLR_COMPOSITE_SRC_OUT        = 7,
-    COLR_COMPOSITE_DEST_OUT       = 8,
-    COLR_COMPOSITE_SRC_ATOP       = 9,
-    COLR_COMPOSITE_DEST_ATOP      = 10,
-    COLR_COMPOSITE_XOR            = 11,
-    COLR_COMPOSITE_SCREEN         = 12,
-    COLR_COMPOSITE_OVERLAY        = 13,
-    COLR_COMPOSITE_DARKEN         = 14,
-    COLR_COMPOSITE_LIGHTEN        = 15,
-    COLR_COMPOSITE_COLOR_DODGE    = 16,
-    COLR_COMPOSITE_COLOR_BURN     = 17,
-    COLR_COMPOSITE_HARD_LIGHT     = 18,
-    COLR_COMPOSITE_SOFT_LIGHT     = 19,
-    COLR_COMPOSITE_DIFFERENCE     = 20,
-    COLR_COMPOSITE_EXCLUSION      = 21,
-    COLR_COMPOSITE_MULTIPLY       = 22,
-    COLR_COMPOSITE_HSL_HUE        = 23,
-    COLR_COMPOSITE_HSL_SATURATION = 24,
-    COLR_COMPOSITE_HSL_COLOR      = 25,
-    COLR_COMPOSITE_HSL_LUMINOSITY = 26,
-    COLR_COMPOSITE_MAX            = 27
-  } FT_Composite_Mode;
+
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_PaintRotate
+   *
+   * @description:
+   *   Struct representing a COLRv  PaintRotate paint table. Used for
+   *   rotating downstream paints with a given center and angle.
+   *
+   *
+   * @fields:
+   *   paint ::
+   *     An @FT_OpaquePaint referencing the paint that is to be rotated.
+   *   angle ::
+   *     The rotation angle that is to be applied.
+   *   center_x ::
+   *     The x coordiante of the pivot point of the rotation in font units.
+   *   center_y ::
+   *     The y coordiante of the pivot point of the rotation in font units.
+   */
 
   typedef struct FT_PaintRotate_ {
     FT_OpaquePaint paint;
@@ -4570,6 +4676,28 @@ FT_BEGIN_HEADER
     FT_Fixed       center_y;
   } FT_PaintRotate;
 
+
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_PaintSkew
+   *
+   * @description:
+   *   Struct representing a COLRv1 PaintSkew paint table. Used for skewing
+   *   or shearing downstream paints by a given center and angle.
+   *
+   * @fields:
+   *   paint ::
+   *     An @FT_OpaquePaint referencing the paint that is to be skewed.
+   *   x_skew_angle ::
+   *     The skewing angle in x direction.
+   *   y_skew_angle ::
+   *     The skewing angle in y direction.
+   *   center_x ::
+   *     The x coordiante of the pivot point of the skew in font units.
+   *   center_y ::
+   *     The y coordiante of the pivot point of the skew in font units.
+   */
   typedef struct FT_PaintSkew_
   {
     FT_OpaquePaint paint;
@@ -4579,6 +4707,26 @@ FT_BEGIN_HEADER
     FT_Fixed       center_y;
   } FT_PaintSkew;
 
+
+  /**************************************************************************
+   *
+   * @struct:
+   *   FT_PaintComposite
+   *
+   * @description:
+   *   Struct representing a COLRv1 PaintComposite paint table. Used for
+   *   compositing two paints in a COLRv1 directed acycling graph.
+   *
+   * @fields:
+   *   source_paint ::
+   *     An @FT_OpaquePaint referencing the source that is to be composited.
+   *   composite_mode ::
+   *     An enum @FT_Composite_Mode enum value determining the composition
+   *     operation.
+   *   backdrop_paint ::
+   *     An @FT_OpaquePaint referencing the backdrop paint that will
+   *     be composited onto.
+   */
   typedef struct FT_PaintComposite_
   {
     FT_OpaquePaint   source_paint;
@@ -4593,23 +4741,26 @@ FT_BEGIN_HEADER
    *   FT_COLR_Paint
    *
    * @description:
-   *   Struct representing the Paint union of the COLR v1 extensions,
-   *   see https://github.com/googlefonts/colr-gradients-spec
-   *   The glyph layer filled with this paint will be
-   *   filled with a radial gradient.
-   *
+   *   Union object representing format and details of a paint table of a COLRv1
+   *   font, see https://github.com/googlefonts/colr-gradients-spec
+   *   Use @FT_Get_Paint to retrieve a @FT_COLR_Paint for an @FT_OpaquePaint.
    *
    * @fields:
    *   format ::
    *     The gradient format for this Paint structure.
    *
    *   u ::
-   *     Union of @FT_PaintSolid, @FT_PaintLinearGradient or
-   *     @FT_PaintRadialGradient depending on format, see @FT_PaintFormat.
-   *     The suitable union member will be populated by
-   *     @FT_Get_Color_Glyph_Layer_Gradients, for example the
-   *     @FT_PaintLinearGradient member will be set if the format is a
-   * linear gradient.
+   *     Union of all paint table types:
+   *        * @FT_PaintColrLayers
+   *        * @FT_PaintGlyph
+   *        * @FT_PaintSolid
+   *        * @FT_PaintLinearGradient
+   *        * @FT_PaintRadialGradient
+   *        * @FT_PaintTransformed
+   *        * @FT_PaintRotate
+   *        * @FT_PaintSkew
+   *        * @FT_PaintComposite
+   *        * @FT_PaintColrGlyph
    */
   typedef struct FT_COLR_Paint_
   {
@@ -4629,57 +4780,92 @@ FT_BEGIN_HEADER
     } u;
   } FT_COLR_Paint;
 
+
   /**************************************************************************
    *
    * @function:
-   *   FT_Get_Color_Glyph_Layer_Gradients
+   *   FT_Get_Color_Glyph_Paint
    *
    * @description:
-   *   This is an interface to color gradient information in a 'COLR' v1 table
-   *   in OpenType fonts to iteratively retrieve the gradient and solid fill
-   *   information for colored glyph layers for a specified glyph id.
+   *
+   *   This is the starting point and interface to color gradient information in
+   *   a 'COLR' v1 table in OpenType fonts to recursively retrieve the paint
+   *   tables for the directed acyclic graph of a colored glyph, given a glyph
+   *   id.
    *
    *     https://github.com/googlefonts/colr-gradients-spec
+   *
+   *   In a COLRv1 font, each color glyph defines a directed acyclic graph of
+   *   nested paint tables, such as PaintGlyph, PaintSolid, PaintLinearGradient,
+   *   PaintRadialGradient and so on. Using this function and specifying a glyph
+   *   id, one retrieves the root paint table for this glyph id.
    *
    * @input:
    *   face ::
    *     A handle to the parent face object.
    *
    *   base_glyph ::
-   *     The glyph index the colored glyph layers are associated with.
-   *
-   * @inout:
-   *   iterator ::
-   *     An @FT_LayerIterator object.  For the first call you should set
-   *     `iterator->p` to `NULL`.  For all following calls, simply use the
-   *     same object again.
+   *     The glyph index for which to retrieve the root paint table.
    *
    * @output:
    *   paint ::
-   *     The @FT_COLR_Paint union specifying a paint format and further
-   *     gradient information in the union members.
+   *     The @FT_OpaquePaint object that references the actual paint table.
    *
-   *     The color palette can be retrieved with @FT_Palette_Select.
+   *     The respective actual FT_Paint* object is retrieved via @FT_Get_Paint.
    *
    * @return:
-   *   Value~1 if everything is OK.  If there are no more layers (or if there
-   *   are no COLR v1 layers at all), value~0 gets returned.  In case of an
-   * error, value~0 is returned also.
+   *   Value~1 if everything is OK.  If no color glyph is found, or the * root
+   *   paint could not be retrieved, value~0 gets returned.  In case of an *
+   *   error, value~0 is returned also.
    */
   FT_EXPORT( FT_Bool )
   FT_Get_Color_Glyph_Paint( FT_Face         face,
                             FT_UInt         base_glyph,
                             FT_OpaquePaint* paint );
 
-  /* Accesses the layers/paints of a PaintColrGlyph as FT_OpaquePaint* output
-   * objects through the FT_LayerIterator that is retrieved from the
-   * PaintColrGlyph struct retrieved through FT_Get_Paint for a PaintColrGlyph
-   * FT_OpaquePaint.
+
+  /**************************************************************************
+   *
+   * @function:
+   *   FT_Get_Paint_Layers
+   *
+   * @description:
+   *
+   *   Accesses the layers of a PaintColrLayers table.
+   *
+   *   If the root paint of a color glyph, or a nested paint of a colr glyph is
+   *   a PaintColrLayers table, this function is used to retrieve the layers of
+   *   the PaintColrLayers table.
+   *
+   *   The @FT_PaintColrLayers object contains an @FT_LayerIterator which is
+   *   used here to iterate over the layers. Each layer is returned as a
+   *   @FT_OpaquePaint object, which then can be used with @FT_Get_Paint to
+   *   retrieve the actual paint object.
+
+   * @input:
+   *   face ::
+   *     A handle to the parent face object.
+   *
+   * @inout:
+   *   iterator ::
+   *     The @FT_LayerIterator from a @FT_PaintColrLayers object, for which
+   *     the layers are to be retrieved. The internal state of the iterator
+   *     is increment after one call to this function for retrieving one layer.
+   *
+   * @output:
+   *   paint ::
+   *     The @FT_OpaquePaint object that references the actual paint table.
+   *     The respective actual FT_Paint* object is retrieved via @FT_Get_Paint.
+   *
+   * @return:
+   *   Value~1 if everything is OK.  Value~0 gets returned for when the paint
+   *   object can not be retrieved or any other error occurs.
    */
   FT_EXPORT( FT_Bool )
   FT_Get_Paint_Layers( FT_Face           face,
                        FT_LayerIterator* iterator,
                        FT_OpaquePaint*   paint );
+
 
   /**************************************************************************
    *
@@ -4716,15 +4902,36 @@ FT_BEGIN_HEADER
                           FT_ColorStop*         color_stop,
                           FT_ColorStopIterator* iterator );
 
+
   /**************************************************************************
    * @function
    *  FT_Get_Paint
    *
-   * @description: Accesses a paint using an opaque paint which internally
-   * stores the offset to the respective Paint object in the COLR table.
+   * @description:
+   *
+   *   Accesses the details of a paint using an @FT_OpaquePaint opaque paint
+   *   object which internally stores the offset to the respective Paint object
+   *   in the COLR table.
+   *
+   * @input:
+   *   face ::
+   *     A handle to the parent face object.
+   *   paint ::
+   *     The opaque paint object for which the underlying FT_COLR_Paint data is
+   *     to be retrieved.
+   *
+   * @output:
+   *   paint ::
+   *     The specific FT_COLOR_Paint object containing information coming
+   *     from one of the fonts Paint* tables.
+   *
+   * @return:
+   *   Value~1 if everything is OK.  Value~0 if no details can be found for this
+   *   paint or any other error occured.
    */
   FT_EXPORT( FT_Bool )
   FT_Get_Paint( FT_Face face, FT_OpaquePaint opaque_paint, FT_COLR_Paint* paint );
+
 
   /**************************************************************************
    *
