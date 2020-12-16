@@ -63,12 +63,13 @@ FT_BEGIN_HEADER
                      FT_COLR_Paint*      paint );
 
   FT_LOCAL( FT_Error )
-  tt_face_colr_blend_layer( TT_Face      face,
-                            FT_UInt      color_index,
-                            FT_GlyphSlot dstSlot,
-                            FT_GlyphSlot srcSlot );
+  tt_face_colr_blend_layer( TT_Face       face,
+                            FT_UInt       color_index,
+                            FT_GlyphSlot  dstSlot,
+                            FT_GlyphSlot  srcSlot );
 
-  FT_END_HEADER
+
+FT_END_HEADER
 
 
 #endif /* __TTCOLR_H__ */

@@ -5576,6 +5576,7 @@
     TT_Face       ttface;
     SFNT_Service  sfnt;
 
+
     if ( !face || !paint )
       return 0;
 
@@ -5600,6 +5601,7 @@
     TT_Face       ttface;
     SFNT_Service  sfnt;
 
+
     if ( !face || !paint || !layer_iterator )
       return 0;
 
@@ -5623,6 +5625,7 @@
     TT_Face       ttface;
     SFNT_Service  sfnt;
 
+
     if ( !face || !paint || !paint )
       return 0;
 
@@ -5645,6 +5648,7 @@
   {
     TT_Face       ttface;
     SFNT_Service  sfnt;
+
 
     if ( !face || !color_stop || !iterator )
       return 0;

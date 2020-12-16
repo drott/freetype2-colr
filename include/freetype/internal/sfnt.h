@@ -532,9 +532,9 @@ FT_BEGIN_HEADER
                                                  FT_OpaquePaint*   paint );
 
   typedef FT_Bool
-  ( *TT_Get_Colorline_Stops_Func ) ( TT_Face face,
-                                     FT_ColorStop *color_stop,
-                                     FT_ColorStopIterator *iterator );
+  ( *TT_Get_Colorline_Stops_Func )( TT_Face face,
+                                    FT_ColorStop *color_stop,
+                                    FT_ColorStopIterator *iterator );
 
   typedef FT_Bool
   ( *TT_Get_Paint_Func )( TT_Face        face,
@@ -726,79 +726,80 @@ FT_BEGIN_HEADER
    */
   typedef struct  SFNT_Interface_
   {
-    TT_Loader_GotoTableFunc      goto_table;
+    TT_Loader_GotoTableFunc        goto_table;
 
-    TT_Init_Face_Func            init_face;
-    TT_Load_Face_Func            load_face;
-    TT_Done_Face_Func            done_face;
-    FT_Module_Requester          get_interface;
+    TT_Init_Face_Func              init_face;
+    TT_Load_Face_Func              load_face;
+    TT_Done_Face_Func              done_face;
+    FT_Module_Requester            get_interface;
 
-    TT_Load_Any_Func             load_any;
+    TT_Load_Any_Func               load_any;
 
     /* these functions are called by `load_face' but they can also  */
     /* be called from external modules, if there is a need to do so */
-    TT_Load_Table_Func           load_head;
-    TT_Load_Metrics_Func         load_hhea;
-    TT_Load_Table_Func           load_cmap;
-    TT_Load_Table_Func           load_maxp;
-    TT_Load_Table_Func           load_os2;
-    TT_Load_Table_Func           load_post;
+    TT_Load_Table_Func             load_head;
+    TT_Load_Metrics_Func           load_hhea;
+    TT_Load_Table_Func             load_cmap;
+    TT_Load_Table_Func             load_maxp;
+    TT_Load_Table_Func             load_os2;
+    TT_Load_Table_Func             load_post;
 
-    TT_Load_Table_Func           load_name;
-    TT_Free_Table_Func           free_name;
+    TT_Load_Table_Func             load_name;
+    TT_Free_Table_Func             free_name;
 
     /* this field was called `load_kerning' up to version 2.1.10 */
-    TT_Load_Table_Func           load_kern;
+    TT_Load_Table_Func             load_kern;
 
-    TT_Load_Table_Func           load_gasp;
-    TT_Load_Table_Func           load_pclt;
+    TT_Load_Table_Func             load_gasp;
+    TT_Load_Table_Func             load_pclt;
 
     /* see `ttload.h'; this field was called `load_bitmap_header' up to */
     /* version 2.1.10                                                   */
-    TT_Load_Table_Func           load_bhed;
+    TT_Load_Table_Func             load_bhed;
 
-    TT_Load_SBit_Image_Func      load_sbit_image;
+    TT_Load_SBit_Image_Func        load_sbit_image;
 
     /* see `ttpost.h' */
-    TT_Get_PS_Name_Func          get_psname;
-    TT_Free_Table_Func           free_psnames;
+    TT_Get_PS_Name_Func            get_psname;
+    TT_Free_Table_Func             free_psnames;
 
     /* starting here, the structure differs from version 2.1.7 */
 
     /* this field was introduced in version 2.1.8, named `get_psname' */
-    TT_Face_GetKerningFunc       get_kerning;
+    TT_Face_GetKerningFunc         get_kerning;
 
     /* new elements introduced after version 2.1.10 */
 
     /* load the font directory, i.e., the offset table and */
     /* the table directory                                 */
-    TT_Load_Table_Func           load_font_dir;
-    TT_Load_Metrics_Func         load_hmtx;
+    TT_Load_Table_Func             load_font_dir;
+    TT_Load_Metrics_Func           load_hmtx;
 
-    TT_Load_Table_Func           load_eblc;
-    TT_Free_Table_Func           free_eblc;
+    TT_Load_Table_Func             load_eblc;
+    TT_Free_Table_Func             free_eblc;
 
-    TT_Set_SBit_Strike_Func      set_sbit_strike;
-    TT_Load_Strike_Metrics_Func  load_strike_metrics;
+    TT_Set_SBit_Strike_Func        set_sbit_strike;
+    TT_Load_Strike_Metrics_Func    load_strike_metrics;
 
-    TT_Load_Table_Func            load_cpal;
-    TT_Load_Table_Func            load_colr;
-    TT_Free_Table_Func            free_cpal;
-    TT_Free_Table_Func            free_colr;
-    TT_Set_Palette_Func           set_palette;
-    TT_Get_Colr_Layer_Func        get_colr_layer;
-    TT_Get_Color_Glyph_Paint_Func get_colr_glyph_paint;
-    TT_Get_Paint_Layers_Func      get_paint_layers;
-    TT_Get_Colorline_Stops_Func   get_colorline_stops;
-    TT_Get_Paint_Func             get_paint;
-    TT_Blend_Colr_Func            colr_blend;
+    TT_Load_Table_Func             load_cpal;
+    TT_Load_Table_Func             load_colr;
+    TT_Free_Table_Func             free_cpal;
+    TT_Free_Table_Func             free_colr;
+    TT_Set_Palette_Func            set_palette;
+    TT_Get_Colr_Layer_Func         get_colr_layer;
+    TT_Get_Color_Glyph_Paint_Func  get_colr_glyph_paint;
+    TT_Get_Paint_Layers_Func       get_paint_layers;
+    TT_Get_Colorline_Stops_Func    get_colorline_stops;
+    TT_Get_Paint_Func              get_paint;
+    TT_Blend_Colr_Func             colr_blend;
 
-    TT_Get_Metrics_Func          get_metrics;
+    TT_Get_Metrics_Func            get_metrics;
 
-    TT_Get_Name_Func             get_name;
-    TT_Get_Name_ID_Func          get_name_id;
+    TT_Get_Name_Func               get_name;
+    TT_Get_Name_ID_Func            get_name_id;
 
   } SFNT_Interface;
+
 
   /* transitional */
   typedef SFNT_Interface*   SFNT_Service;

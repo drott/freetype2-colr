@@ -40,16 +40,16 @@
 
 
   /* NOTE: These are the table sizes calculated through the specs. */
-#define BASE_GLYPH_SIZE                  6U
-#define BASE_GLYPH_V1_RECORD_SIZE        6U
-#define LAYER_V1_LIST_PAINT_OFFSET_SIZE  4U
-#define LAYER_V1_LIST_NUM_LAYERS_SIZE    4U
-#define COLOR_STOP_SIZE                  6U
-#define LAYER_SIZE                       4U
-#define COLR_HEADER_SIZE                14U
+#define BASE_GLYPH_SIZE                   6U
+#define BASE_GLYPH_V1_RECORD_SIZE         6U
+#define LAYER_V1_LIST_PAINT_OFFSET_SIZE   4U
+#define LAYER_V1_LIST_NUM_LAYERS_SIZE     4U
+#define COLOR_STOP_SIZE                   6U
+#define LAYER_SIZE                        4U
+#define COLR_HEADER_SIZE                 14U
 
 
-  typedef struct BaseGlyphRecord_
+  typedef struct  BaseGlyphRecord_
   {
     FT_UShort  gid;
     FT_UShort  first_layer_index;
@@ -57,14 +57,16 @@
 
   } BaseGlyphRecord;
 
-  typedef struct BaseGlyphV1Record_
+
+  typedef struct  BaseGlyphV1Record_
   {
     FT_UShort gid;
     /* Offset from start of BaseGlyphV1List, i.e. from base_glyphs_v1. */
     FT_ULong paint_offset;
   } BaseGlyphV1Record;
 
-  typedef struct Colr_
+
+  typedef struct  Colr_
   {
     FT_UShort  version;
     FT_UShort  num_base_glyphs;
@@ -104,17 +106,16 @@
     FT_Error   error;
     FT_Memory  memory = face->root.memory;
 
-    FT_Byte *table = NULL;
-    FT_Byte *p = NULL;
+    FT_Byte* table = NULL;
+    FT_Byte* p     = NULL;
     /* Needed for reading array lengths in referenced tables. */
-    FT_Byte *p1 = NULL;
+    FT_Byte* p1    = NULL;
 
     Colr*  colr = NULL;
 
     FT_ULong base_glyph_offset, layer_offset, base_glyphs_offset_v1,
         num_base_glyphs_v1, layer_offset_v1, num_layers_v1;
-    FT_ULong  table_size;
-
+    FT_ULong table_size;
 
     /* `COLR' always needs `CPAL' */
     if ( !face->cpal )
@@ -325,6 +326,7 @@
     FT_PaintExtend paint_extend;
     /* TODO: Check pointer limits. */
 
+
     paint_extend = FT_NEXT_BYTE( p );
     if ( paint_extend > COLR_PAINT_EXTEND_REFLECT )
       return 0;
@@ -339,9 +341,12 @@
   }
 
   static FT_Bool
-  read_paint( Colr* colr, FT_Byte* p, FT_COLR_Paint* apaint )
+  read_paint( Colr* colr,
+              FT_Byte* p,
+              FT_COLR_Paint* apaint )
   {
     FT_Byte *paint_base;
+
 
     paint_base = p;
 
@@ -418,7 +423,8 @@
       FT_NEXT_ULONG ( p );
       apaint->u.linear_gradient.p2.y = FT_NEXT_SHORT ( p );
       FT_NEXT_ULONG ( p );
-    } else if ( apaint->format == COLR_PAINTFORMAT_RADIAL_GRADIENT )
+    }
+    else if ( apaint->format == COLR_PAINTFORMAT_RADIAL_GRADIENT )
     {
       FT_ULong color_line_offset = 0;
       FT_ULong affine_offset = 0;
@@ -600,6 +606,7 @@
     BaseGlyphV1Record base_glyph_v1_record;
     FT_Byte *         p;
 
+
     if ( colr->version < 1 || !colr->num_base_glyphs_v1 ||
          !colr->base_glyphs_v1 )
       return 0;
@@ -633,6 +640,7 @@
   {
     FT_Byte * p = NULL, *p_first_layer = NULL;
     FT_UInt32 paint_offset;
+
 
     if ( iterator->layer == iterator->num_layers )
       return 0;
@@ -676,6 +684,7 @@
     Colr* colr = (Colr*)face->colr;
     FT_Byte *p;
 
+
     if ( iterator->current_color_stop >= iterator->num_color_stops )
       return 0;
 
@@ -707,6 +716,7 @@
   {
     Colr* colr = (Colr*)face->colr;
     FT_Byte *p;
+
 
     if ( opaque_paint.p < (FT_Byte*)colr->table ||
          opaque_paint.p >= (FT_Byte*)( colr->table + colr->table_size ) )

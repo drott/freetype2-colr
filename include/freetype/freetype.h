@@ -2902,7 +2902,7 @@ FT_BEGIN_HEADER
    *
    *     If the font is 'tricky' (see @FT_FACE_FLAG_TRICKY for more), using
    *     `FT_LOAD_NO_SCALE` usually yields meaningless outlines because the
-   *     subglyphs must be scaled and positioned with hinting instructions.
+   *     subglyphs must be scaled and positioned with hinting instructions. 
    *     This can be solved by loading the font without `FT_LOAD_NO_SCALE`
    *     and setting the character size to `font->units_per_EM`.
    *
@@ -4254,13 +4254,14 @@ FT_BEGIN_HEADER
    *     An opaque pointer into 'COLR' table data.  The caller must set this
    *     to `NULL` before the first call of @FT_Get_Colorline_Stops.
    */
-  typedef struct FT_ColorStopIterator_
+  typedef struct  FT_ColorStopIterator_
   {
     FT_UInt   num_color_stops;
     FT_UInt   current_color_stop;
     FT_Byte*  p;
 
   } FT_ColorStopIterator;
+
 
   /**************************************************************************
    *
@@ -4278,11 +4279,12 @@ FT_BEGIN_HEADER
    *   alpha ::
    *     Alpha transparency value multiplied with the value from CPAL.
    */
-  typedef struct FT_PaintColor_
+  typedef struct  FT_PaintColor_
   {
     FT_UInt16  palette_index;
     FT_F2Dot14 alpha;
   } FT_PaintColor;
+
 
   /**************************************************************************
    *
@@ -4300,11 +4302,12 @@ FT_BEGIN_HEADER
    *   color ::
    *     The color information for this stop, see @FT_PaintColor.
    */
-  typedef struct FT_ColorStop_
+  typedef struct  FT_ColorStop_
   {
     FT_F2Dot14    stop_offset;
     FT_PaintColor color;
   } FT_ColorStop;
+
 
   /**************************************************************************
    *
@@ -4316,7 +4319,7 @@ FT_BEGIN_HEADER
    *   see https://github.com/googlefonts/colr-gradients-spec
    *   Describes how the gradient fill continues at the other boundaries.
    */
-  typedef enum FT_PaintExtend_
+  typedef enum  FT_PaintExtend_
   {
     COLR_PAINT_EXTEND_PAD     = 0,
     COLR_PAINT_EXTEND_REPEAT  = 1,
@@ -4342,7 +4345,7 @@ FT_BEGIN_HEADER
    *     The @FT_ColorStopIterator used to enumerate and retrieve the
    *     actual @FT_ColorStop's.
    */
-  typedef struct FT_ColorLine_
+  typedef struct  FT_ColorLine_
   {
     FT_PaintExtend       extend;
     FT_ColorStopIterator color_stop_iterator;
@@ -4384,7 +4387,7 @@ FT_BEGIN_HEADER
    *     y translation.
    *
    */
-  typedef struct FT_Affine_23_
+  typedef struct  FT_Affine_23_
   {
     FT_Fixed  xx, xy, dx;
     FT_Fixed  yx, yy, dy;
@@ -4401,7 +4404,7 @@ FT_BEGIN_HEADER
    *   For more details on each paint mode, see
    *   https://www.w3.org/TR/compositing-1/#porterduffcompositingoperators
    */
-  typedef enum
+  typedef enum  CT_Composite_Mode_
   {
     COLR_COMPOSITE_CLEAR          = 0,
     COLR_COMPOSITE_SRC            = 1,
@@ -4455,7 +4458,7 @@ FT_BEGIN_HEADER
    *     An internal offset to a Paint table, needs to be set to NULL before
    *     passing this struct as an argument to FT_Get_Paint.
    */
-  typedef struct FT_Opaque_Paint_
+  typedef struct  FT_Opaque_Paint_
   {
     FT_Byte* p;
   } FT_OpaquePaint;
@@ -4479,7 +4482,7 @@ FT_BEGIN_HEADER
    *   layer_iterator ::
    *     The layer iterator that describes the layers of this paint.
    */
-  typedef struct FT_PaintColrLayers_
+  typedef struct  FT_PaintColrLayers_
   {
     FT_LayerIterator layer_iterator;
   } FT_PaintColrLayers;
@@ -4493,15 +4496,15 @@ FT_BEGIN_HEADER
    * @description:
    *   Struct representing a PaintSolid of the COLR v1 extensions,
    *   see https://github.com/googlefonts/colr-gradients-spec
-   *   Means that the glyph layer filled with this paint will be
-   *   solid colored and not contain a gradient.
+   *   Using a PaintSolid means that the glyph layer filled with this paint is
+   *   solid colored and does not contain a gradient.
    *
    *
    * @fields:
    *   color ::
    *     The color information for this solid paint, see @FT_PaintColor.
    */
-  typedef struct FT_PaintSolid_
+  typedef struct  FT_PaintSolid_
   {
     FT_PaintColor color;
   } FT_PaintSolid;
@@ -4515,8 +4518,8 @@ FT_BEGIN_HEADER
    * @description:
    *   Struct representing a PaintLinearGradient of the COLR v1 extensions,
    *   see https://github.com/googlefonts/colr-gradients-spec
-   *   The glyph layer filled with this paint will be
-   *   filled with a linear gradient.
+   *   The glyph layer filled with this paint is
+   *   drawn filled with a linear gradient.
    *
    *
    * @fields:
@@ -4533,7 +4536,7 @@ FT_BEGIN_HEADER
    *   p2 ::
    *     Optional point p2 to rotate the gradient. Otherwise equal to p0.
    */
-  typedef struct FT_PaintLinearGradient_
+  typedef struct  FT_PaintLinearGradient_
   {
     FT_ColorLine   colorline;
     /* TODO: Potentially expose those as x0, y0 etc. */
@@ -4550,7 +4553,7 @@ FT_BEGIN_HEADER
    * @description:
    *   Struct representing a PaintRadialGradient of the COLR v1 extensions,
    *   see https://github.com/googlefonts/colr-gradients-spec
-   *   The glyph layer filled with this paint will be
+   *   The glyph layer filled with this paint is drawn filled
    *   filled with a radial gradient.
    *
    *
@@ -4575,7 +4578,7 @@ FT_BEGIN_HEADER
    *     An optional affine transformation matrix to transform the gradient
    *     rendering.
    */
-  typedef struct FT_PaintRadialGradient_
+  typedef struct  FT_PaintRadialGradient_
   {
     FT_ColorLine   colorline;
     /* TODO: Potentially expose those as x0, y0 etc. */
@@ -4602,11 +4605,12 @@ FT_BEGIN_HEADER
    *     The glyph id from the glyf table which serves as the contour
    *     information that is filled with paint.
    */
-  typedef struct FT_PaintGlyph_
+  typedef struct  FT_PaintGlyph_
   {
     FT_OpaquePaint paint;
     FT_UInt glyphID;
   } FT_PaintGlyph;
+
 
   /**************************************************************************
    *
@@ -4621,10 +4625,11 @@ FT_BEGIN_HEADER
    *   glyphID ::
    *     The glyph id from the BaseGlyphV1List that is drawn for this paint.
    */
-  typedef struct FT_PaintColrGlyph_
+  typedef struct  FT_PaintColrGlyph_
   {
     FT_UInt glyphID;
   } FT_PaintColrGlyph;
+
 
 
   /**************************************************************************
@@ -4641,7 +4646,7 @@ FT_BEGIN_HEADER
    *   affine ::
    *     A 2x3 transformation matrix in @FT_Affine23 format.
    */
-  typedef struct FT_PaintTransformed_
+  typedef struct  FT_PaintTransformed_
   {
     FT_OpaquePaint paint;
     FT_Affine23 affine;
@@ -4669,7 +4674,7 @@ FT_BEGIN_HEADER
    *     The y coordiante of the pivot point of the rotation in font units.
    */
 
-  typedef struct FT_PaintRotate_ {
+  typedef struct  FT_PaintRotate_ {
     FT_OpaquePaint paint;
     FT_Fixed       angle;
     FT_Fixed       center_x;
@@ -4698,7 +4703,7 @@ FT_BEGIN_HEADER
    *   center_y ::
    *     The y coordiante of the pivot point of the skew in font units.
    */
-  typedef struct FT_PaintSkew_
+  typedef struct  FT_PaintSkew_
   {
     FT_OpaquePaint paint;
     FT_Fixed       x_skew_angle;
@@ -4724,10 +4729,10 @@ FT_BEGIN_HEADER
    *     An enum @FT_Composite_Mode enum value determining the composition
    *     operation.
    *   backdrop_paint ::
-   *     An @FT_OpaquePaint referencing the backdrop paint that will
-   *     be composited onto.
+   *     An @FT_OpaquePaint referencing the backdrop paint that source_paint
+   *     is composited onto.
    */
-  typedef struct FT_PaintComposite_
+  typedef struct  FT_PaintComposite_
   {
     FT_OpaquePaint   source_paint;
     FT_Composite_Mode composite_mode;
@@ -4762,7 +4767,7 @@ FT_BEGIN_HEADER
    *        * @FT_PaintComposite
    *        * @FT_PaintColrGlyph
    */
-  typedef struct FT_COLR_Paint_
+  typedef struct  FT_COLR_Paint_
   {
     FT_PaintFormat format;
     union
