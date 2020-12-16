@@ -4266,7 +4266,7 @@ FT_BEGIN_HEADER
   /**************************************************************************
    *
    * @struct:
-   *   FT_PaintColor
+   *   FT_ColorIndex
    *
    * @description:
    *   Struct representing a ColorIndex of the COLR v1 extensions,
@@ -4279,11 +4279,11 @@ FT_BEGIN_HEADER
    *   alpha ::
    *     Alpha transparency value multiplied with the value from CPAL.
    */
-  typedef struct  FT_PaintColor_
+  typedef struct  FT_ColorIndex_
   {
     FT_UInt16  palette_index;
     FT_F2Dot14 alpha;
-  } FT_PaintColor;
+  } FT_ColorIndex;
 
 
   /**************************************************************************
@@ -4300,12 +4300,12 @@ FT_BEGIN_HEADER
    *     The stop offset between 0 and 1 along the gradient.
    *
    *   color ::
-   *     The color information for this stop, see @FT_PaintColor.
+   *     The color information for this stop, see @FT_ColorIndex.
    */
   typedef struct  FT_ColorStop_
   {
     FT_F2Dot14    stop_offset;
-    FT_PaintColor color;
+    FT_ColorIndex color;
   } FT_ColorStop;
 
 
@@ -4502,11 +4502,11 @@ FT_BEGIN_HEADER
    *
    * @fields:
    *   color ::
-   *     The color information for this solid paint, see @FT_PaintColor.
+   *     The color information for this solid paint, see @FT_ColorIndex.
    */
   typedef struct  FT_PaintSolid_
   {
-    FT_PaintColor color;
+    FT_ColorIndex color;
   } FT_PaintSolid;
 
 
