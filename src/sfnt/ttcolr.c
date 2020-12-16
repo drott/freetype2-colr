@@ -360,6 +360,7 @@
       FT_Byte num_layers;
       FT_UInt32 first_layer_index;
 
+
       num_layers = FT_NEXT_BYTE( p );
 
       if (num_layers > colr->num_layers_v1)
@@ -381,9 +382,10 @@
     }
 
     if (apaint->format == COLR_PAINTFORMAT_GLYPH) {
-
       FT_UInt32 paint_offset = 0;
       FT_Byte* paint_p;
+
+
       paint_offset           = FT_NEXT_UOFF3( p );
       if ( !paint_offset )
         return 0;
@@ -404,6 +406,8 @@
     else if ( apaint->format == COLR_PAINTFORMAT_LINEAR_GRADIENT )
     {
       FT_ULong color_line_offset = 0;
+
+
       color_line_offset          = FT_NEXT_OFF3( p );
       if ( !read_color_line ( colr,
                               paint_base,
@@ -428,6 +432,7 @@
     {
       FT_ULong color_line_offset = 0;
       FT_ULong affine_offset = 0;
+
 
       color_line_offset = FT_NEXT_OFF3( p );
       if ( !read_color_line ( colr,
@@ -460,6 +465,8 @@
     {
       FT_UInt32 paint_offset = 0;
       FT_Byte* paint_p;
+
+
       paint_offset           = FT_NEXT_UOFF3( p );
       if ( !paint_offset )
         return 0;
@@ -506,6 +513,8 @@
     {
       FT_UInt32 paint_offset = 0;
       FT_Byte*  paint_p;
+
+
       paint_offset = FT_NEXT_UOFF3( p );
       if ( !paint_offset )
         return 0;
@@ -549,6 +558,7 @@
       FT_UInt32 paint_offset = 0;
       FT_Byte* paint_p;
       FT_UInt composite_mode = 0;
+
 
       paint_offset           = FT_NEXT_UOFF3( p );
       if ( !paint_offset )
