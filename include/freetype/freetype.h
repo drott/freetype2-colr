@@ -4224,10 +4224,11 @@ FT_BEGIN_HEADER
     COLR_PAINTFORMAT_GLYPH           = 5,
     COLR_PAINTFORMAT_COLR_GLYPH      = 6,
     COLR_PAINTFORMAT_TRANSFORMED     = 7,
-    COLR_PAINTFORMAT_ROTATE          = 8,
-    COLR_PAINTFORMAT_SKEW            = 9,
-    COLR_PAINTFORMAT_COMPOSITE       = 10,
-    COLR_PAINT_FORMAT_MAX            = 11,
+    COLR_PAINTFORMAT_TRANSLATE       = 8,
+    COLR_PAINTFORMAT_ROTATE          = 9,
+    COLR_PAINTFORMAT_SKEW            = 10,
+    COLR_PAINTFORMAT_COMPOSITE       = 11,
+    COLR_PAINT_FORMAT_MAX            = 12,
     COLR_PAINTFORMAT_UNSUPPORTED     = 255
   } FT_PaintFormat;
 
@@ -4656,6 +4657,30 @@ FT_BEGIN_HEADER
   /**************************************************************************
    *
    * @struct:
+   *   FT_PaintTranslate
+   *
+   * @description:
+   *   Struct representing a COLRv1 PaintTranslate paint table. Used for
+   *   translating downstream paints by a given x and y delta.
+   *
+   * @fields:
+   *   paint ::
+   *     An @FT_OpaquePaint referencing the paint that is to be rotated.
+   *   dx ::
+   *     Translation in x direction in font units.
+   *   dy ::
+   *     Translation in y direction in font units.
+   */
+  typedef struct  FT_PaintTranslate_ {
+    FT_OpaquePaint paint;
+    FT_Fixed       dx;
+    FT_Fixed       dy;
+  } FT_PaintTranslate;
+
+
+/**************************************************************************
+   *
+   * @struct:
    *   FT_PaintRotate
    *
    * @description:
@@ -4762,6 +4787,7 @@ FT_BEGIN_HEADER
    *        * @FT_PaintLinearGradient
    *        * @FT_PaintRadialGradient
    *        * @FT_PaintTransformed
+   *        * @FT_PaintTranslate
    *        * @FT_PaintRotate
    *        * @FT_PaintSkew
    *        * @FT_PaintComposite
@@ -4778,6 +4804,7 @@ FT_BEGIN_HEADER
       FT_PaintLinearGradient linear_gradient;
       FT_PaintRadialGradient radial_gradient;
       FT_PaintTransformed    transformed;
+      FT_PaintTranslate      translate;
       FT_PaintRotate         rotate;
       FT_PaintSkew           skew;
       FT_PaintComposite      composite;

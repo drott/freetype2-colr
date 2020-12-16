@@ -482,6 +482,26 @@
       apaint->u.transformed.affine.dy = FT_NEXT_LONG( p );
       FT_NEXT_ULONG( p ); /* drop varIdx */
     }
+    else if ( apaint->format == COLR_PAINTFORMAT_TRANSLATE )
+    {
+      FT_UInt32 paint_offset = 0;
+      FT_Byte*  paint_p;
+
+
+      paint_offset = FT_NEXT_UOFF3( p );
+      if ( !paint_offset )
+        return 0;
+      paint_p = (FT_Byte*)( paint_base + paint_offset );
+      if ( paint_p > (FT_Byte*)( colr->table + colr->table_size ) )
+        return 0;
+
+      apaint->u.translate.paint.p = paint_p;
+
+      apaint->u.translate.dx = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+      apaint->u.translate.dy = FT_NEXT_LONG( p );
+      FT_NEXT_ULONG( p ); /* drop varIdx */
+    }
     else if ( apaint->format == COLR_PAINTFORMAT_ROTATE )
     {
       FT_UInt32 paint_offset = 0;
