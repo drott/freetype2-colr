@@ -636,6 +636,8 @@
     BaseGlyphV1Record base_glyph_v1_record;
     FT_Byte *         p;
 
+    if ( !colr )
+      return 0;
 
     if ( colr->version < 1 || !colr->num_base_glyphs_v1 ||
          !colr->base_glyphs_v1 )
@@ -715,6 +717,9 @@
     FT_Byte *p;
 
 
+    if ( !colr )
+      return 0;
+
     if ( iterator->current_color_stop >= iterator->num_color_stops )
       return 0;
 
@@ -747,6 +752,8 @@
     Colr* colr = (Colr*)face->colr;
     FT_Byte *p;
 
+    if ( !colr )
+      return 0;
 
     if ( opaque_paint.p < (FT_Byte*)colr->table ||
          opaque_paint.p >= (FT_Byte*)( colr->table + colr->table_size ) )

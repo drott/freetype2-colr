@@ -1,3 +1,10 @@
+2021-01-13  Dominik Röttsches  <drott@chromium.org>
+
+	* sfnt/ttcolr.c (tt_face_get_colr_glyph_paint)
+	(tt_face_get_colorline_stops, tt_face_get_paint): Additional
+	checks for whether colr table is present. Prevents crashes when
+	these methods are called on non-COLR fonts.
+
 2021-01-10  Werner Lemberg  <wl@gnu.org>
 
 	* builds/*: s/BUILD_DIR/PLATFORM_DIR/.
