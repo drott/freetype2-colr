@@ -1,5 +1,16 @@
 2021-01-13  Dominik Röttsches  <drott@chromium.org>
 
+	[sfnt] Add define to test for COLRv1 support in headers
+
+	* include/freetype/config/ftoption.h (TT_SUPPORT_COLRV1): Add
+	additional define so that clients can test for whether the
+	FreeType checkout that they are building against supports the
+	COLRv1 API. This is intended to be a temporary solution until
+	COLRv1 support is released in a FreeType version and such a check
+	can be made by using the version number instead.
+
+2021-01-13  Dominik Röttsches  <drott@chromium.org>
+
 	* sfnt/ttcolr.c (tt_face_get_colr_glyph_paint)
 	(tt_face_get_colorline_stops, tt_face_get_paint): Additional
 	checks for whether colr table is present. Prevents crashes when
